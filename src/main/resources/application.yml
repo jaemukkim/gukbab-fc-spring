@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: gukbab-fc
+  thymeleaf:
+    cache: false
+
+server:
+  port: 8080
