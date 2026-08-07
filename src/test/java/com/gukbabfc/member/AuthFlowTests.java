@@ -1,5 +1,6 @@
 package com.gukbabfc.member;
 
+import com.gukbabfc.member.dao.MemberRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,6 +44,7 @@ class AuthFlowTests {
         Member member = memberRepository.findByUsername("gukbab").orElseThrow();
         assertThat(member.getPassword()).isNotEqualTo("gukbab1234");
         assertThat(passwordEncoder.matches("gukbab1234", member.getPassword())).isTrue();
+        assertThat(member.getRole()).isEqualTo(MemberRole.MEMBER);
 
         mockMvc.perform(formLogin().user("gukbab").password("gukbab1234"))
                 .andExpect(status().is3xxRedirection())

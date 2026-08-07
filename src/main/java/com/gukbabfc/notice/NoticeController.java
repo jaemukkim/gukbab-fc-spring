@@ -1,5 +1,6 @@
 package com.gukbabfc.notice;
 
+import com.gukbabfc.notice.dto.NoticeCreateRequest;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;

@@ -5,12 +5,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "members")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
     @Id
@@ -34,49 +41,19 @@ public class Member {
     @Column(length = 300)
     private String introduction;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private MemberRole role;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    protected Member() {
-    }
 
     public Member(String username, String password, String name) {
         this.username = username;
         this.password = password;
         this.name = name;
+        this.role = MemberRole.MEMBER;
         this.createdAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getPosition() {
-        return position;
-    }
-
-    public Integer getBackNumber() {
-        return backNumber;
-    }
-
-    public String getIntroduction() {
-        return introduction;
     }
 
     public void updateProfile(String name, String position, Integer backNumber, String introduction) {
@@ -84,5 +61,13 @@ public class Member {
         this.position = position;
         this.backNumber = backNumber;
         this.introduction = introduction;
+    }
+
+    public MemberRole getRole() {
+        return role == null ? MemberRole.MEMBER : role;
+    }
+
+    public void promoteToAdmin() {
+        this.role = MemberRole.ADMIN;
     }
 }

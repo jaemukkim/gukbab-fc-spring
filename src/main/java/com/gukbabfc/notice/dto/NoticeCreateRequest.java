@@ -1,4 +1,4 @@
-package com.gukbabfc.notice;
+package com.gukbabfc.notice.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

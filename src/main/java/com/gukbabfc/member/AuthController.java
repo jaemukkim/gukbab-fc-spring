@@ -1,5 +1,6 @@
 package com.gukbabfc.member;
 
+import com.gukbabfc.member.dto.SignupRequest;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

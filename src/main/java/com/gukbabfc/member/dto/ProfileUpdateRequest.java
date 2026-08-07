@@ -1,4 +1,4 @@
-package com.gukbabfc.member;
+package com.gukbabfc.member.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

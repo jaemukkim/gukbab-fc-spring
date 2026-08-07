@@ -15,3 +15,7 @@ spring:
 
 server:
   port: 8080
+
+app:
+  admin:
+    username: ${ADMIN_USERNAME:}

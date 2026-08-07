@@ -1,19 +1,19 @@
-package com.gukbabfc.notice;
+package com.gukbabfc.notice.dto;
+
+import com.gukbabfc.notice.Notice;
 
 import java.time.LocalDateTime;
 
-public record NoticeDetail(
+public record NoticeListItem(
         Long id,
         String title,
-        String content,
         String authorName,
         LocalDateTime createdAt
 ) {
-    public static NoticeDetail from(Notice notice) {
-        return new NoticeDetail(
+    public static NoticeListItem from(Notice notice) {
+        return new NoticeListItem(
                 notice.getId(),
                 notice.getTitle(),
-                notice.getContent(),
                 notice.getAuthor().getName(),
                 notice.getCreatedAt()
         );

@@ -1,7 +1,9 @@
 package com.gukbabfc.notice;
 
 import com.gukbabfc.member.Member;
-import com.gukbabfc.member.MemberRepository;
+import com.gukbabfc.member.dao.MemberRepository;
+import com.gukbabfc.notice.dao.NoticeRepository;
+import com.gukbabfc.notice.dto.NoticeDetail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +79,7 @@ class NoticeFlowTests {
     }
 
     @Test
-    @WithMockUser(username = "noticeuser", roles = "MEMBER")
+    @WithMockUser(username = "noticeuser", roles = "ADMIN")
     void 공지사항을_작성할_수_있다() throws Exception {
         mockMvc.perform(post("/notices")
                         .with(csrf())
@@ -94,7 +96,7 @@ class NoticeFlowTests {
     }
 
     @Test
-    @WithMockUser(username = "noticeuser", roles = "MEMBER")
+    @WithMockUser(username = "noticeuser", roles = "ADMIN")
     void 제목과_내용이_비어_있으면_공지사항을_작성할_수_없다() throws Exception {
         mockMvc.perform(post("/notices")
                         .with(csrf())
@@ -103,6 +105,25 @@ class NoticeFlowTests {
                 .andExpect(status().isOk())
                 .andExpect(view().name("notice/form"))
                 .andExpect(model().attributeHasFieldErrors("noticeCreateRequest", "title", "content"));
+
+        assertThat(noticeRepository.count()).isZero();
+    }
+
+    @Test
+    @WithMockUser(username = "noticeuser", roles = "MEMBER")
+    void 일반_회원은_공지사항_작성_화면에_접근할_수_없다() throws Exception {
+        mockMvc.perform(get("/notices/new"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "noticeuser", roles = "MEMBER")
+    void 일반_회원은_공지사항을_작성할_수_없다() throws Exception {
+        mockMvc.perform(post("/notices")
+                        .with(csrf())
+                        .param("title", "권한 없는 공지")
+                        .param("content", "등록되면 안 됩니다."))
+                .andExpect(status().isForbidden());
 
         assertThat(noticeRepository.count()).isZero();
     }

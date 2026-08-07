@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,7 +26,7 @@
             <p class="eyebrow">TEAM NEWS</p>
             <h1>공지사항</h1>
         </div>
-        <a class="primary-link" th:href="@{/notices/new}">공지 작성</a>
+        <a class="primary-link" th:href="@{/notices/new}" sec:authorize="hasRole('ADMIN')">공지 작성</a>
     </div>
 
     <section class="notice-list">

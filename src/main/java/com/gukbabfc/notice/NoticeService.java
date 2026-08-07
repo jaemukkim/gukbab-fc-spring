@@ -1,8 +1,14 @@
 package com.gukbabfc.notice;
 
 import com.gukbabfc.member.Member;
-import com.gukbabfc.member.MemberRepository;
+import com.gukbabfc.member.dao.MemberRepository;
+import com.gukbabfc.notice.dao.NoticeRepository;
+import com.gukbabfc.notice.dto.NoticeCreateRequest;
+import com.gukbabfc.notice.dto.NoticeDetail;
+import com.gukbabfc.notice.dto.NoticeListItem;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -10,15 +16,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
     private final MemberRepository memberRepository;
-
-    public NoticeService(NoticeRepository noticeRepository, MemberRepository memberRepository) {
-        this.noticeRepository = noticeRepository;
-        this.memberRepository = memberRepository;
-    }
 
     @Transactional(readOnly = true)
     public List<NoticeListItem> getNotices() {
@@ -35,6 +37,7 @@ public class NoticeService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public Long createNotice(String username, NoticeCreateRequest request) {
         Member author = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));

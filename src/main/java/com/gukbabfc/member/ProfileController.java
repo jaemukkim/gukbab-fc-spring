@@ -1,5 +1,7 @@
 package com.gukbabfc.member;
 
+import com.gukbabfc.member.dto.PlayerProfile;
+import com.gukbabfc.member.dto.ProfileUpdateRequest;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;

@@ -1,4 +1,6 @@
-package com.gukbabfc.member;
+package com.gukbabfc.member.dto;
+
+import com.gukbabfc.member.Member;
 
 public record PlayerProfile(
         Long id,

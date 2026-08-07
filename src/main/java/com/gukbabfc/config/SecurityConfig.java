@@ -1,10 +1,12 @@
 package com.gukbabfc.config;
 
 import com.gukbabfc.member.Member;
-import com.gukbabfc.member.MemberRepository;
+import com.gukbabfc.member.dao.MemberRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -20,6 +23,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/signup", "/login", "/css/**").permitAll()
+                        .requestMatchers("/notices/new").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/notices").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
@@ -41,7 +46,7 @@ public class SecurityConfig {
                     .orElseThrow(() -> new UsernameNotFoundException("회원을 찾을 수 없습니다."));
             return User.withUsername(member.getUsername())
                     .password(member.getPassword())
-                    .roles("MEMBER")
+                    .roles(member.getRole().name())
                     .build();
         };
     }
