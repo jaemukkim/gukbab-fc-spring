@@ -9,7 +9,8 @@ public record NoticeDetail(
         String title,
         String content,
         String authorName,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
     public static NoticeDetail from(Notice notice) {
         return new NoticeDetail(
@@ -17,7 +18,8 @@ public record NoticeDetail(
                 notice.getTitle(),
                 notice.getContent(),
                 notice.getAuthor().getName(),
-                notice.getCreatedAt()
+                notice.getCreatedAt(),
+                notice.getUpdatedAt()
         );
     }
 }

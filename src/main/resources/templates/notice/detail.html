@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,8 +18,18 @@
 </header>
 
 <main class="content-page">
+    <div class="alert success" th:if="${param.updated}">공지사항을 수정했습니다.</div>
     <article class="notice-detail">
-        <a class="back-link" th:href="@{/notices}">← 목록으로</a>
+        <div class="notice-toolbar">
+            <a class="back-link" th:href="@{/notices}">← 목록으로</a>
+            <div class="admin-actions" sec:authorize="hasRole('ADMIN')">
+                <a class="secondary-link" th:href="@{/notices/{id}/edit(id=${notice.id})}">수정</a>
+                <form th:action="@{/notices/{id}/delete(id=${notice.id})}" method="post"
+                      onsubmit="return confirm('이 공지사항을 삭제하시겠습니까?');">
+                    <button class="danger-button" type="submit">삭제</button>
+                </form>
+            </div>
+        </div>
         <header>
             <p class="eyebrow">NOTICE</p>
             <h1 th:text="${notice.title}">공지 제목</h1>
@@ -25,6 +37,8 @@
                 <span th:text="${notice.authorName}">작성자</span>
                 <time th:datetime="${notice.createdAt}"
                       th:text="${#temporals.format(notice.createdAt, 'yyyy.MM.dd HH:mm')}">작성일</time>
+                <span th:if="${notice.updatedAt != null}"
+                      th:text="|수정 ${#temporals.format(notice.updatedAt, 'yyyy.MM.dd HH:mm')}|">수정일</span>
             </div>
         </header>
         <div class="notice-content" th:text="${notice.content}">공지 내용</div>

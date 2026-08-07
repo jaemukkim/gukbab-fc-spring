@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -115,7 +117,8 @@ class NoticeFlowTests {
     @WithMockUser(username = "noticeuser", roles = "MEMBER")
     void 일반_회원은_공지사항_작성_화면에_접근할_수_없다() throws Exception {
         mockMvc.perform(get("/notices/new"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(forwardedUrl("/access-denied"));
     }
 
     @Test
@@ -125,8 +128,64 @@ class NoticeFlowTests {
                         .with(csrf())
                         .param("title", "권한 없는 공지")
                         .param("content", "등록되면 안 됩니다."))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(forwardedUrl("/access-denied"));
 
         assertThat(noticeRepository.count()).isZero();
+    }
+
+    @Test
+    @WithMockUser(username = "noticeuser", roles = "ADMIN")
+    void 관리자는_공지사항을_수정할_수_있다() throws Exception {
+        Notice notice = noticeRepository.save(new Notice("수정 전 제목", "수정 전 내용", author));
+
+        mockMvc.perform(get("/notices/{id}/edit", notice.getId()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("notice/edit-form"))
+                .andExpect(model().attributeExists("noticeUpdateRequest"));
+
+        mockMvc.perform(post("/notices/{id}/edit", notice.getId())
+                        .with(csrf())
+                        .param("title", "  수정된 제목  ")
+                        .param("content", "  수정된 내용  "))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/notices/" + notice.getId() + "?updated"));
+
+        NoticeDetail detail = noticeService.getNotice(notice.getId());
+        assertThat(detail.title()).isEqualTo("수정된 제목");
+        assertThat(detail.content()).isEqualTo("수정된 내용");
+        assertThat(detail.updatedAt()).isNotNull();
+    }
+
+    @Test
+    @WithMockUser(username = "noticeuser", roles = "ADMIN")
+    void 관리자는_공지사항을_삭제할_수_있다() throws Exception {
+        Notice notice = noticeRepository.save(new Notice("삭제할 공지", "삭제할 내용", author));
+
+        mockMvc.perform(post("/notices/{id}/delete", notice.getId()).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/notices?deleted"));
+
+        assertThat(noticeRepository.existsById(notice.getId())).isFalse();
+    }
+
+    @Test
+    @WithMockUser(username = "noticeuser", roles = "MEMBER")
+    void 일반_회원은_공지사항을_수정하거나_삭제할_수_없다() throws Exception {
+        Notice notice = noticeRepository.save(new Notice("원래 제목", "원래 내용", author));
+
+        mockMvc.perform(post("/notices/{id}/edit", notice.getId())
+                        .with(csrf())
+                        .param("title", "권한 없는 수정")
+                        .param("content", "수정되면 안 됩니다."))
+                .andExpect(status().isForbidden())
+                .andExpect(forwardedUrl("/access-denied"));
+
+        mockMvc.perform(post("/notices/{id}/delete", notice.getId()).with(csrf()))
+                .andExpect(status().isForbidden())
+                .andExpect(forwardedUrl("/access-denied"));
+
+        Notice savedNotice = noticeRepository.findById(notice.getId()).orElseThrow();
+        assertThat(savedNotice.getTitle()).isEqualTo("원래 제목");
     }
 }

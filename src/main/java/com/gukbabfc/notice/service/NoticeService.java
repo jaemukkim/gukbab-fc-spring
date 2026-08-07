@@ -6,6 +6,7 @@ import com.gukbabfc.notice.dao.NoticeRepository;
 import com.gukbabfc.notice.dto.NoticeCreateRequest;
 import com.gukbabfc.notice.dto.NoticeDetail;
 import com.gukbabfc.notice.dto.NoticeListItem;
+import com.gukbabfc.notice.dto.NoticeUpdateRequest;
 import com.gukbabfc.notice.entity.Notice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,5 +45,23 @@ public class NoticeService {
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
         Notice notice = new Notice(request.getTitle().trim(), request.getContent().trim(), author);
         return noticeRepository.save(notice).getId();
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public void updateNotice(Long id, NoticeUpdateRequest request) {
+        Notice notice = findNotice(id);
+        notice.update(request.getTitle().trim(), request.getContent().trim());
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteNotice(Long id) {
+        noticeRepository.delete(findNotice(id));
+    }
+
+    private Notice findNotice(Long id) {
+        return noticeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "공지사항을 찾을 수 없습니다."));
     }
 }

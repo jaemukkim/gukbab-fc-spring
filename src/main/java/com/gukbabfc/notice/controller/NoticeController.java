@@ -1,6 +1,8 @@
 package com.gukbabfc.notice.controller;
 
 import com.gukbabfc.notice.dto.NoticeCreateRequest;
+import com.gukbabfc.notice.dto.NoticeDetail;
+import com.gukbabfc.notice.dto.NoticeUpdateRequest;
 import com.gukbabfc.notice.service.NoticeService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -12,16 +14,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/notices")
+@RequiredArgsConstructor
 public class NoticeController {
 
     private final NoticeService noticeService;
-
-    public NoticeController(NoticeService noticeService) {
-        this.noticeService = noticeService;
-    }
 
     @GetMapping
     public String list(Model model) {
@@ -50,5 +50,32 @@ public class NoticeController {
         }
         Long noticeId = noticeService.createNotice(authentication.getName(), noticeCreateRequest);
         return "redirect:/notices/" + noticeId;
+    }
+
+    @GetMapping("/{id}/edit")
+    public String updateForm(@PathVariable Long id, Model model) {
+        NoticeDetail notice = noticeService.getNotice(id);
+        model.addAttribute("noticeId", id);
+        model.addAttribute("noticeUpdateRequest", NoticeUpdateRequest.from(notice));
+        return "notice/edit-form";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String update(@PathVariable Long id,
+                         @Valid @ModelAttribute NoticeUpdateRequest noticeUpdateRequest,
+                         BindingResult bindingResult,
+                         Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("noticeId", id);
+            return "notice/edit-form";
+        }
+        noticeService.updateNotice(id, noticeUpdateRequest);
+        return "redirect:/notices/" + id + "?updated";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable Long id) {
+        noticeService.deleteNotice(id);
+        return "redirect:/notices?deleted";
     }
 }

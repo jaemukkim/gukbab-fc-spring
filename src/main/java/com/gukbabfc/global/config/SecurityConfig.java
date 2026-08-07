@@ -23,8 +23,9 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/signup", "/login", "/css/**").permitAll()
-                        .requestMatchers("/notices/new").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/notices").hasRole("ADMIN")
+                        .requestMatchers("/access-denied").permitAll()
+                        .requestMatchers("/notices/new", "/notices/*/edit").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/notices", "/notices/*/edit", "/notices/*/delete").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
@@ -35,6 +36,9 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")
                         .permitAll()
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedPage("/access-denied")
                 );
         return http.build();
     }
