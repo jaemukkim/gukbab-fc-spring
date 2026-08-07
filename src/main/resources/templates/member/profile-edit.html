@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>프로필 수정 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="auth-page">
+<main class="auth-card profile-form-card">
+    <a class="auth-brand" th:href="@{/mypage}">← 내 프로필</a>
+    <h1>프로필 수정</h1>
+    <p class="auth-description">팀원들에게 보여줄 선수 정보를 입력해 주세요.</p>
+
+    <form class="auth-form" th:action="@{/mypage/edit}" th:object="${profileUpdateRequest}" method="post">
+        <div class="field">
+            <label for="name">이름</label>
+            <input id="name" type="text" th:field="*{name}" maxlength="30">
+            <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+        </div>
+        <div class="field-row">
+            <div class="field">
+                <label for="position">포지션</label>
+                <input id="position" type="text" th:field="*{position}" maxlength="10" placeholder="예: FW, MF, DF, GK">
+                <p class="field-error" th:if="${#fields.hasErrors('position')}" th:errors="*{position}"></p>
+            </div>
+            <div class="field">
+                <label for="backNumber">등번호</label>
+                <input id="backNumber" type="number" th:field="*{backNumber}" min="0" max="99" placeholder="0~99">
+                <p class="field-error" th:if="${#fields.hasErrors('backNumber')}" th:errors="*{backNumber}"></p>
+            </div>
+        </div>
+        <div class="field">
+            <label for="introduction">한 줄 소개</label>
+            <textarea id="introduction" th:field="*{introduction}" maxlength="300" rows="5"
+                      placeholder="플레이 스타일이나 하고 싶은 말을 적어 주세요."></textarea>
+            <p class="field-error" th:if="${#fields.hasErrors('introduction')}" th:errors="*{introduction}"></p>
+        </div>
+        <button class="primary-button" type="submit">저장하기</button>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>마이페이지 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav>
+        <a th:href="@{/players}">선수 목록</a>
+        <form th:action="@{/logout}" method="post">
+            <button class="link-button" type="submit">로그아웃</button>
+        </form>
+    </nav>
+</header>
+
+<main class="content-page">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">MY PROFILE</p>
+            <h1>내 프로필</h1>
+        </div>
+        <a class="primary-link" th:href="@{/mypage/edit}">프로필 수정</a>
+    </div>
+
+    <div class="alert success" th:if="${param.updated}">프로필을 수정했습니다.</div>
+
+    <section class="profile-detail">
+        <div class="profile-number" th:text="${profile.backNumber != null ? profile.backNumber : '-'}">10</div>
+        <div>
+            <p class="profile-position" th:text="${profile.position != null ? profile.position : '포지션 미등록'}">MF</p>
+            <h2 th:text="${profile.name}">선수 이름</h2>
+            <p class="profile-username" th:text="|@${profile.username}|">@username</p>
+            <p class="profile-introduction"
+               th:text="${profile.introduction != null ? profile.introduction : '아직 등록된 소개가 없습니다.'}">
+                선수 소개
+            </p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -26,6 +26,14 @@ public class Member {
     @Column(nullable = false, length = 30)
     private String name;
 
+    @Column(length = 10)
+    private String position;
+
+    private Integer backNumber;
+
+    @Column(length = 300)
+    private String introduction;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -57,5 +65,24 @@ public class Member {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public Integer getBackNumber() {
+        return backNumber;
+    }
+
+    public String getIntroduction() {
+        return introduction;
+    }
+
+    public void updateProfile(String name, String position, Integer backNumber, String introduction) {
+        this.name = name;
+        this.position = position;
+        this.backNumber = backNumber;
+        this.introduction = introduction;
     }
 }

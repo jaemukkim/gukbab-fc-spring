@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>선수 프로필 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav>
+        <a th:href="@{/mypage}">내 프로필</a>
+        <form th:action="@{/logout}" method="post">
+            <button class="link-button" type="submit">로그아웃</button>
+        </form>
+    </nav>
+</header>
+
+<main class="content-page">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">OUR SQUAD</p>
+            <h1>국밥FC 선수들</h1>
+        </div>
+    </div>
+
+    <section class="player-grid">
+        <article class="player-card" th:each="player : ${players}">
+            <div class="player-card-top">
+                <span class="player-card-position"
+                      th:text="${player.position != null ? player.position : 'FC'}">MF</span>
+                <strong class="player-card-number"
+                        th:text="${player.backNumber != null ? player.backNumber : '-'}">10</strong>
+            </div>
+            <h2 th:text="${player.name}">선수 이름</h2>
+            <p class="profile-username" th:text="|@${player.username}|">@username</p>
+            <p class="player-card-introduction"
+               th:text="${player.introduction != null ? player.introduction : '자기소개를 준비 중입니다.'}">
+                선수 소개
+            </p>
+        </article>
+    </section>
+</main>
+</body>
+</html>
