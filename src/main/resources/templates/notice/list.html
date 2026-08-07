@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>공지사항 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav>
+        <a th:href="@{/players}">선수 프로필</a>
+        <a th:href="@{/mypage}">내 프로필</a>
+        <form th:action="@{/logout}" method="post">
+            <button class="link-button" type="submit">로그아웃</button>
+        </form>
+    </nav>
+</header>
+
+<main class="content-page">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">TEAM NEWS</p>
+            <h1>공지사항</h1>
+        </div>
+        <a class="primary-link" th:href="@{/notices/new}">공지 작성</a>
+    </div>
+
+    <section class="notice-list">
+        <div class="empty-state" th:if="${#lists.isEmpty(notices)}">
+            <h2>등록된 공지가 없습니다.</h2>
+            <p>첫 번째 팀 소식을 남겨보세요.</p>
+        </div>
+
+        <a class="notice-row" th:each="notice : ${notices}" th:href="@{/notices/{id}(id=${notice.id})}">
+            <strong th:text="${notice.title}">공지 제목</strong>
+            <span th:text="${notice.authorName}">작성자</span>
+            <time th:datetime="${notice.createdAt}"
+                  th:text="${#temporals.format(notice.createdAt, 'yyyy.MM.dd HH:mm')}">2026.08.07</time>
+        </a>
+    </section>
+</main>
+</body>
+</html>

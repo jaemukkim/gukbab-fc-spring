@@ -1,2 +1,2 @@
-# gukbab fc
+# GB-FC
 
