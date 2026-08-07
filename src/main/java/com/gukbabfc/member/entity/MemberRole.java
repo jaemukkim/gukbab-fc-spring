@@ -1,4 +1,4 @@
-package com.gukbabfc.member;
+package com.gukbabfc.member.entity;
 
 public enum MemberRole {
     MEMBER,

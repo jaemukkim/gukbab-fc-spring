@@ -1,9 +1,11 @@
-package com.gukbabfc.member;
+package com.gukbabfc.member.service;
 
 import com.gukbabfc.member.dao.MemberRepository;
 import com.gukbabfc.member.dto.PlayerProfile;
 import com.gukbabfc.member.dto.ProfileUpdateRequest;
 import com.gukbabfc.member.dto.SignupRequest;
+import com.gukbabfc.member.entity.Member;
+import com.gukbabfc.member.exception.SignupException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

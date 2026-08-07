@@ -1,4 +1,4 @@
-package com.gukbabfc.member;
+package com.gukbabfc.member.exception;
 
 public class SignupException extends RuntimeException {
 

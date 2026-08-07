@@ -1,4 +1,4 @@
-package com.gukbabfc.home;
+package com.gukbabfc.home.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -1,6 +1,8 @@
 package com.gukbabfc.member;
 
 import com.gukbabfc.member.dao.MemberRepository;
+import com.gukbabfc.member.entity.Member;
+import com.gukbabfc.member.entity.MemberRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

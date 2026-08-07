@@ -1,6 +1,6 @@
 package com.gukbabfc.notice.dto;
 
-import com.gukbabfc.notice.Notice;
+import com.gukbabfc.notice.entity.Notice;
 
 import java.time.LocalDateTime;
 

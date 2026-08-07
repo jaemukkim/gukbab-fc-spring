@@ -1,9 +1,11 @@
 package com.gukbabfc.notice;
 
-import com.gukbabfc.member.Member;
 import com.gukbabfc.member.dao.MemberRepository;
+import com.gukbabfc.member.entity.Member;
 import com.gukbabfc.notice.dao.NoticeRepository;
 import com.gukbabfc.notice.dto.NoticeDetail;
+import com.gukbabfc.notice.entity.Notice;
+import com.gukbabfc.notice.service.NoticeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,8 @@
-package com.gukbabfc.member;
+package com.gukbabfc.member.controller;
 
 import com.gukbabfc.member.dto.SignupRequest;
+import com.gukbabfc.member.exception.SignupException;
+import com.gukbabfc.member.service.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

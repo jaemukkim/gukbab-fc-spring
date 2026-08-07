@@ -1,4 +1,4 @@
-package com.gukbabfc.config;
+package com.gukbabfc.global.config;
 
 import com.gukbabfc.member.dao.MemberRepository;
 import lombok.extern.slf4j.Slf4j;

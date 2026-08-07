@@ -1,6 +1,6 @@
-package com.gukbabfc.notice;
+package com.gukbabfc.notice.entity;
 
-import com.gukbabfc.member.Member;
+import com.gukbabfc.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

@@ -1,4 +1,4 @@
-package com.gukbabfc.member;
+package com.gukbabfc.member.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

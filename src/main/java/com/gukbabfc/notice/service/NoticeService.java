@@ -1,11 +1,12 @@
-package com.gukbabfc.notice;
+package com.gukbabfc.notice.service;
 
-import com.gukbabfc.member.Member;
+import com.gukbabfc.member.entity.Member;
 import com.gukbabfc.member.dao.MemberRepository;
 import com.gukbabfc.notice.dao.NoticeRepository;
 import com.gukbabfc.notice.dto.NoticeCreateRequest;
 import com.gukbabfc.notice.dto.NoticeDetail;
 import com.gukbabfc.notice.dto.NoticeListItem;
+import com.gukbabfc.notice.entity.Notice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;

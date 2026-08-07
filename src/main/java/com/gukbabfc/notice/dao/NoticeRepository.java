@@ -1,6 +1,6 @@
 package com.gukbabfc.notice.dao;
 
-import com.gukbabfc.notice.Notice;
+import com.gukbabfc.notice.entity.Notice;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,6 +1,6 @@
-package com.gukbabfc.config;
+package com.gukbabfc.global.config;
 
-import com.gukbabfc.member.Member;
+import com.gukbabfc.member.entity.Member;
 import com.gukbabfc.member.dao.MemberRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
