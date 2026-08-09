@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>풋살 일정 수정 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav><a th:href="@{/schedules/{id}(id=${scheduleId})}">일정으로 돌아가기</a></nav>
+</header>
+
+<main class="content-page narrow-page">
+    <div class="page-heading">
+        <div><p class="eyebrow">EDIT SCHEDULE</p><h1>풋살 일정 수정</h1></div>
+    </div>
+
+    <form class="notice-form" th:action="@{/schedules/{id}/edit(id=${scheduleId})}"
+          th:object="${scheduleUpdateRequest}" method="post">
+        <div class="field">
+            <label for="title">일정 제목</label>
+            <input id="title" type="text" th:field="*{title}" maxlength="100" autofocus>
+            <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+        </div>
+        <div class="field-row">
+            <div class="field">
+                <label for="location">장소</label>
+                <input id="location" type="text" th:field="*{location}" maxlength="100">
+                <p class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></p>
+            </div>
+            <div class="field">
+                <label for="scheduledAt">경기 일시</label>
+                <input id="scheduledAt" type="datetime-local" th:field="*{scheduledAt}" step="60">
+                <p class="field-error" th:if="${#fields.hasErrors('scheduledAt')}" th:errors="*{scheduledAt}"></p>
+            </div>
+        </div>
+        <div class="field">
+            <label for="description">상세 안내</label>
+            <textarea id="description" th:field="*{description}" maxlength="3000" rows="10"></textarea>
+            <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
+        </div>
+        <div class="form-actions">
+            <a class="secondary-link" th:href="@{/schedules/{id}(id=${scheduleId})}">취소</a>
+            <button class="primary-button" type="submit">수정하기</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

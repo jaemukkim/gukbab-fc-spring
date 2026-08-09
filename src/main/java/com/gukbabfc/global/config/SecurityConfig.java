@@ -26,6 +26,8 @@ public class SecurityConfig {
                         .requestMatchers("/access-denied").permitAll()
                         .requestMatchers("/notices/new", "/notices/*/edit").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/notices", "/notices/*/edit", "/notices/*/delete").hasRole("ADMIN")
+                        .requestMatchers("/schedules/new", "/schedules/*/edit").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/schedules", "/schedules/*/edit", "/schedules/*/delete").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login

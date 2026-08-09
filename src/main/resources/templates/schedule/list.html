@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>풋살 일정 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav>
+        <a th:href="@{/notices}">공지사항</a>
+        <a th:href="@{/freeboards}">자유게시판</a>
+        <a th:href="@{/mypage}">내 프로필</a>
+    </nav>
+</header>
+
+<main class="content-page">
+    <div class="alert success" th:if="${param.deleted}">풋살 일정을 삭제했습니다.</div>
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">FUTSAL SCHEDULE</p>
+            <h1>풋살 일정</h1>
+        </div>
+        <a class="primary-link" th:href="@{/schedules/new}" sec:authorize="hasRole('ADMIN')">일정 등록</a>
+    </div>
+
+    <section class="schedule-section">
+        <h2>예정된 일정</h2>
+        <div class="empty-state schedule-empty" th:if="${#lists.isEmpty(upcomingSchedules)}">
+            <p>예정된 풋살 일정이 없습니다.</p>
+        </div>
+        <div class="schedule-grid" th:unless="${#lists.isEmpty(upcomingSchedules)}">
+            <a class="schedule-card" th:each="schedule : ${upcomingSchedules}"
+               th:href="@{/schedules/{id}(id=${schedule.id})}">
+                <time th:datetime="${schedule.scheduledAt}"
+                      th:text="${#temporals.format(schedule.scheduledAt, 'MM.dd (E) HH:mm')}">08.15 18:00</time>
+                <h3 th:text="${schedule.title}">정기 풋살</h3>
+                <p th:text="|📍 ${schedule.location}|">장소</p>
+            </a>
+        </div>
+    </section>
+
+    <section class="schedule-section past-schedules">
+        <h2>지난 일정</h2>
+        <div class="empty-state schedule-empty" th:if="${#lists.isEmpty(pastSchedules)}">
+            <p>지난 풋살 일정이 없습니다.</p>
+        </div>
+        <div class="schedule-grid" th:unless="${#lists.isEmpty(pastSchedules)}">
+            <a class="schedule-card" th:each="schedule : ${pastSchedules}"
+               th:href="@{/schedules/{id}(id=${schedule.id})}">
+                <time th:datetime="${schedule.scheduledAt}"
+                      th:text="${#temporals.format(schedule.scheduledAt, 'yyyy.MM.dd HH:mm')}">2026.08.01 18:00</time>
+                <h3 th:text="${schedule.title}">지난 풋살</h3>
+                <p th:text="|📍 ${schedule.location}|">장소</p>
+            </a>
+        </div>
+    </section>
+</main>
+</body>
+</html>
