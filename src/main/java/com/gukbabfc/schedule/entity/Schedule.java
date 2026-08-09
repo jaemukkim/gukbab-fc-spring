@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * 풋살 경기의 일시, 장소, 안내를 저장하는 JPA 엔티티입니다.
+ */
 @Entity
 @Table(name = "schedules")
 @Getter

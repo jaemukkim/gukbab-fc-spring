@@ -4,6 +4,9 @@ import com.gukbabfc.notice.entity.Notice;
 
 import java.time.LocalDateTime;
 
+/**
+ * 공지사항 상세 화면에 전달할 정보를 담습니다.
+ */
 public record NoticeDetail(
         Long id,
         String title,

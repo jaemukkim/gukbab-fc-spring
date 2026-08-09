@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
+/**
+ * 애플리케이션 시작 시 지정된 회원을 관리자로 승격합니다.
+ */
 public class AdminAccountInitializer implements ApplicationRunner {
 
     private final MemberRepository memberRepository;

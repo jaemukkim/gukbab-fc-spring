@@ -5,6 +5,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * 프로필 수정 화면에서 전달받은 입력값을 담습니다.
+ */
 public class ProfileUpdateRequest {
 
     @NotBlank(message = "이름을 입력해 주세요.")

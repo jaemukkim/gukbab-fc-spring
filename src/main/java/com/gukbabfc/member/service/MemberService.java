@@ -14,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 회원가입, 회원 조회, 프로필 변경 업무 규칙을 처리합니다.
+ */
 @Service
 @RequiredArgsConstructor
 public class MemberService {

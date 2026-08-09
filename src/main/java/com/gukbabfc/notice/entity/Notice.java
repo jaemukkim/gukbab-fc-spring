@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * 관리자가 작성한 공지사항을 저장하는 JPA 엔티티입니다.
+ */
 @Entity
 @Table(name = "notices")
 @Getter

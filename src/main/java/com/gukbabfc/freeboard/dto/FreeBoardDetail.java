@@ -4,6 +4,9 @@ import com.gukbabfc.freeboard.entity.FreeBoardPost;
 
 import java.time.LocalDateTime;
 
+/**
+ * 자유게시글 상세 화면에 전달할 정보를 담습니다.
+ */
 public record FreeBoardDetail(
         Long id,
         String title,

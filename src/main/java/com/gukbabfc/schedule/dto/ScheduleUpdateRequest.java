@@ -9,6 +9,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
+/**
+ * 풋살 일정 수정 입력값과 검증 규칙을 담습니다.
+ */
 @Getter
 @Setter
 public class ScheduleUpdateRequest {

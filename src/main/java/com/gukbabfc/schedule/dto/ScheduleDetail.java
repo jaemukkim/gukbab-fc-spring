@@ -4,6 +4,9 @@ import com.gukbabfc.schedule.entity.Schedule;
 
 import java.time.LocalDateTime;
 
+/**
+ * 풋살 일정 상세 화면에 전달할 정보를 담습니다.
+ */
 public record ScheduleDetail(
         Long id,
         String title,

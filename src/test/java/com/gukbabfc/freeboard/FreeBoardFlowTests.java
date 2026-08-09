@@ -28,6 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+/**
+ * 자유게시판 CRUD, 검색, 페이징, 작성자 권한을 검증합니다.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 class FreeBoardFlowTests {

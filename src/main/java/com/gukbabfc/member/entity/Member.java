@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * 회원 계정과 선수 프로필 정보를 저장하는 JPA 엔티티입니다.
+ */
 @Entity
 @Table(name = "members")
 @Getter

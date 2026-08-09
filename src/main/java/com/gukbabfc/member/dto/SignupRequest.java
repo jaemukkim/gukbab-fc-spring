@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/**
+ * 회원가입 화면의 입력값과 검증 규칙을 담습니다.
+ */
 public class SignupRequest {
 
     @NotBlank(message = "아이디를 입력해 주세요.")

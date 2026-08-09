@@ -1,3 +1,4 @@
+# 애플리케이션, H2 데이터베이스, JPA, 화면 템플릿의 공통 실행 설정입니다.
 spring:
   application:
     name: gukbab-fc

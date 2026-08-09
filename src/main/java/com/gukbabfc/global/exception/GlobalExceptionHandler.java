@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 
+/**
+ * 애플리케이션 전역 예외를 HTTP 상태와 오류 화면으로 변환합니다.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

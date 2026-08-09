@@ -4,6 +4,9 @@ import com.gukbabfc.schedule.entity.Schedule;
 
 import java.time.LocalDateTime;
 
+/**
+ * 풋살 일정 목록의 일정 한 건을 표현합니다.
+ */
 public record ScheduleListItem(
         Long id,
         String title,

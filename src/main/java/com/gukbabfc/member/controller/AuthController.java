@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+/**
+ * 회원가입과 로그인 화면 및 요청을 처리합니다.
+ */
 @Controller
 public class AuthController {
 

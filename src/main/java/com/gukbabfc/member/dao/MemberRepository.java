@@ -9,6 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 import java.util.List;
 
+/**
+ * 회원 엔티티의 저장과 조회를 담당하는 JPA 저장소입니다.
+ */
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByUsername(String username);

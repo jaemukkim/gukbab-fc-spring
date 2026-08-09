@@ -20,6 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+/**
+ * 프로필 조회와 수정 흐름을 검증하는 통합 테스트입니다.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 class ProfileFlowTests {

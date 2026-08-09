@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+/**
+ * 내 프로필과 선수 목록 화면 요청을 처리합니다.
+ */
 @Controller
 public class ProfileController {
 

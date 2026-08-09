@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * 자유게시판 목록과 게시글 CRUD 화면 요청을 처리합니다.
+ */
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/freeboards")

@@ -14,6 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * URL별 접근 권한과 로그인·로그아웃 방식을 설정합니다.
+ */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {

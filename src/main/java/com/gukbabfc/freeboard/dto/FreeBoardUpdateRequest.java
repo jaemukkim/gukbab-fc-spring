@@ -9,6 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * 자유게시글 수정 입력값과 검증 규칙을 담습니다.
+ */
 public class FreeBoardUpdateRequest {
 
     @NotBlank(message = "제목을 입력해 주세요.")

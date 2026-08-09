@@ -19,6 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+/**
+ * 회원가입과 로그인 보안 흐름을 검증하는 통합 테스트입니다.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 class AuthFlowTests {

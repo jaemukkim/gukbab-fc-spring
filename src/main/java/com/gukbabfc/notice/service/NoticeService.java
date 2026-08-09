@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * 공지사항 조회와 관리자 CRUD 업무 규칙을 처리합니다.
+ */
 @Service
 @RequiredArgsConstructor
 public class NoticeService {

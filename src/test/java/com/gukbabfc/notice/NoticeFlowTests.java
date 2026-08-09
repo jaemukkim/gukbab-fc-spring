@@ -26,6 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+/**
+ * 공지사항 CRUD와 관리자 권한을 검증하는 통합 테스트입니다.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 class NoticeFlowTests {

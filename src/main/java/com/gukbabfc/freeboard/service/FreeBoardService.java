@@ -20,6 +20,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 자유게시글 CRUD, 검색, 작성자 권한 업무 규칙을 처리합니다.
+ */
 @Service
 @RequiredArgsConstructor
 public class FreeBoardService {

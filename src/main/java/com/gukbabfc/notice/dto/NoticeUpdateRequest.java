@@ -9,6 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * 공지사항 수정 입력값과 검증 규칙을 담습니다.
+ */
 public class NoticeUpdateRequest {
 
     @NotBlank(message = "제목을 입력해 주세요.")

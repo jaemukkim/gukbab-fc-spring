@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * 회원이 작성한 자유게시글을 저장하는 JPA 엔티티입니다.
+ */
 @Getter
 @Entity
 @Table(name = "free_board_posts")

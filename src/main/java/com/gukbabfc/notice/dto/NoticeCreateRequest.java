@@ -3,6 +3,9 @@ package com.gukbabfc.notice.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * 공지사항 등록 입력값과 검증 규칙을 담습니다.
+ */
 public class NoticeCreateRequest {
 
     @NotBlank(message = "제목을 입력해 주세요.")

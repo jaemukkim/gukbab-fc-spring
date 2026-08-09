@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 공지사항 목록과 관리자 CRUD 화면 요청을 처리합니다.
+ */
 @Controller
 @RequestMapping("/notices")
 @RequiredArgsConstructor

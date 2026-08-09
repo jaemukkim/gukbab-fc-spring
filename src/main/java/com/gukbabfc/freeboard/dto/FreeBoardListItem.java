@@ -4,6 +4,9 @@ import com.gukbabfc.freeboard.entity.FreeBoardPost;
 
 import java.time.LocalDateTime;
 
+/**
+ * 자유게시판 목록의 게시글 한 건을 표현합니다.
+ */
 public record FreeBoardListItem(
         Long id,
         String title,
