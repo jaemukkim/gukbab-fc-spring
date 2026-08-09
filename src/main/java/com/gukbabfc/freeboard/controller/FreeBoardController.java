@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,8 +24,13 @@ public class FreeBoardController {
     private final FreeBoardService freeBoardService;
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("posts", freeBoardService.getPosts());
+    public String list(@RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = "") String keyword,
+                       Model model) {
+        var postPage = freeBoardService.getPosts(page, keyword);
+        model.addAttribute("postPage", postPage);
+        model.addAttribute("posts", postPage.getContent());
+        model.addAttribute("keyword", keyword.trim());
         return "freeboard/list";
     }
 

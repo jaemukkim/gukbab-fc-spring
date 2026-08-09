@@ -28,10 +28,22 @@
         <a class="primary-link" th:href="@{/freeboards/new}">글쓰기</a>
     </div>
 
+    <form class="board-search" th:action="@{/freeboards}" method="get">
+        <label class="sr-only" for="keyword">제목 또는 내용 검색</label>
+        <input id="keyword" name="keyword" type="search" th:value="${keyword}"
+               placeholder="제목 또는 내용을 검색하세요">
+        <button type="submit">검색</button>
+        <a th:if="${!#strings.isEmpty(keyword)}" th:href="@{/freeboards}">초기화</a>
+    </form>
+
     <section class="board-list">
         <div class="empty-state" th:if="${#lists.isEmpty(posts)}">
-            <h2>등록된 게시글이 없습니다.</h2>
-            <p>첫 번째 이야기를 남겨보세요.</p>
+            <h2 th:text="${#strings.isEmpty(keyword) ? '등록된 게시글이 없습니다.' : '검색 결과가 없습니다.'}">
+                등록된 게시글이 없습니다.
+            </h2>
+            <p th:text="${#strings.isEmpty(keyword) ? '첫 번째 이야기를 남겨보세요.' : '다른 검색어를 입력해보세요.'}">
+                첫 번째 이야기를 남겨보세요.
+            </p>
         </div>
 
         <a class="board-row" th:each="post : ${posts}" th:href="@{/freeboards/{id}(id=${post.id})}">
@@ -41,6 +53,21 @@
                   th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd HH:mm')}">작성일</time>
         </a>
     </section>
+
+    <nav class="pagination" th:if="${postPage.totalPages > 1}" aria-label="자유게시판 페이지">
+        <a th:classappend="${postPage.first} ? 'disabled'"
+           th:href="${postPage.first} ? null : @{/freeboards(page=${postPage.number - 1}, keyword=${keyword})}">
+            이전
+        </a>
+        <a th:each="pageNumber : ${#numbers.sequence(0, postPage.totalPages - 1)}"
+           th:classappend="${pageNumber == postPage.number} ? 'active'"
+           th:href="@{/freeboards(page=${pageNumber}, keyword=${keyword})}"
+           th:text="${pageNumber + 1}">1</a>
+        <a th:classappend="${postPage.last} ? 'disabled'"
+           th:href="${postPage.last} ? null : @{/freeboards(page=${postPage.number + 1}, keyword=${keyword})}">
+            다음
+        </a>
+    </nav>
 </main>
 </body>
 </html>

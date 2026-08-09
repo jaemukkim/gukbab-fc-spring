@@ -2,6 +2,7 @@ package com.gukbabfc.freeboard;
 
 import com.gukbabfc.freeboard.dao.FreeBoardRepository;
 import com.gukbabfc.freeboard.dto.FreeBoardDetail;
+import com.gukbabfc.freeboard.dto.FreeBoardListItem;
 import com.gukbabfc.freeboard.entity.FreeBoardPost;
 import com.gukbabfc.freeboard.service.FreeBoardService;
 import com.gukbabfc.member.dao.MemberRepository;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -177,6 +179,47 @@ class FreeBoardFlowTests {
                 .andExpect(status().isNotFound())
                 .andExpect(view().name("error/404"))
                 .andExpect(model().attributeExists("message"));
+    }
+
+    @Test
+    void 게시글을_한_페이지에_10개씩_최신순으로_조회한다() {
+        for (int number = 1; number <= 12; number++) {
+            savePost("게시글 " + number, "내용 " + number);
+        }
+
+        Page<FreeBoardListItem> firstPage = freeBoardService.getPosts(0, "");
+        Page<FreeBoardListItem> secondPage = freeBoardService.getPosts(1, "");
+
+        assertThat(firstPage.getContent()).hasSize(10);
+        assertThat(firstPage.getTotalElements()).isEqualTo(12);
+        assertThat(firstPage.getTotalPages()).isEqualTo(2);
+        assertThat(firstPage.getContent().getFirst().title()).isEqualTo("게시글 12");
+        assertThat(secondPage.getContent()).hasSize(2);
+        assertThat(secondPage.getContent().getFirst().title()).isEqualTo("게시글 2");
+    }
+
+    @Test
+    @WithMockUser(username = "freeauthor", roles = "MEMBER")
+    void 제목이나_내용으로_게시글을_검색하고_검색어를_화면에_유지한다() throws Exception {
+        savePost("풋살 참가자 모집", "이번 주 토요일 경기입니다.");
+        savePost("유니폼 안내", "구매 신청을 받습니다.");
+        savePost("일반 이야기", "검색 대상이 아닙니다.");
+
+        Page<FreeBoardListItem> titleResult = freeBoardService.getPosts(0, "  풋살  ");
+        Page<FreeBoardListItem> contentResult = freeBoardService.getPosts(0, "구매");
+
+        assertThat(titleResult.getContent())
+                .extracting(FreeBoardListItem::title)
+                .containsExactly("풋살 참가자 모집");
+        assertThat(contentResult.getContent())
+                .extracting(FreeBoardListItem::title)
+                .containsExactly("유니폼 안내");
+
+        mockMvc.perform(get("/freeboards").param("keyword", "  풋살  "))
+                .andExpect(status().isOk())
+                .andExpect(view().name("freeboard/list"))
+                .andExpect(model().attribute("keyword", "풋살"))
+                .andExpect(model().attributeExists("postPage", "posts"));
     }
 
     private Member findOrCreateMember(String username, String name) {

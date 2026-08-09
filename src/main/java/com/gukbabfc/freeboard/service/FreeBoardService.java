@@ -12,24 +12,41 @@ import com.gukbabfc.member.entity.Member;
 import com.gukbabfc.member.entity.MemberRole;
 import com.gukbabfc.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class FreeBoardService {
 
+    private static final int PAGE_SIZE = 10;
+
     private final FreeBoardRepository freeBoardRepository;
     private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
-    public List<FreeBoardListItem> getPosts() {
-        return freeBoardRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(FreeBoardListItem::from)
-                .toList();
+    public Page<FreeBoardListItem> getPosts(int page, String keyword) {
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                PAGE_SIZE,
+                Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"))
+        );
+        String normalizedKeyword = keyword == null ? "" : keyword.trim();
+
+        Page<FreeBoardPost> posts = normalizedKeyword.isBlank()
+                ? freeBoardRepository.findAll(pageable)
+                : freeBoardRepository.findByTitleContainingOrContentContaining(
+                        normalizedKeyword,
+                        normalizedKeyword,
+                        pageable
+                );
+
+        return posts.map(FreeBoardListItem::from);
     }
 
     @Transactional(readOnly = true)
