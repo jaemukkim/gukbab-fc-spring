@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>서비스 오류 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="error-page">
+<main class="error-card">
+    <p class="error-code">500</p>
+    <h1>요청을 처리하지 못했습니다.</h1>
+    <p>잠시 후 다시 시도해 주세요. 문제가 계속되면 관리자에게 알려주세요.</p>
+    <div class="error-actions">
+        <button class="secondary-button" type="button" onclick="history.back()">이전 화면</button>
+        <a class="primary-link" th:href="@{/}">홈으로 이동</a>
+    </div>
+</main>
+</body>
+</html>

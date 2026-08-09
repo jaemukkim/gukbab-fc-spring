@@ -1,0 +1,30 @@
+package com.gukbabfc.freeboard.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class FreeBoardUpdateRequest {
+
+    @NotBlank(message = "제목을 입력해 주세요.")
+    @Size(max = 200, message = "제목은 200자 이하로 입력해 주세요.")
+    private String title;
+
+    @NotBlank(message = "내용을 입력해 주세요.")
+    @Size(max = 10000, message = "내용은 10,000자 이하로 입력해 주세요.")
+    private String content;
+
+    public FreeBoardUpdateRequest(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+    public static FreeBoardUpdateRequest from(FreeBoardDetail detail) {
+        return new FreeBoardUpdateRequest(detail.title(), detail.content());
+    }
+}

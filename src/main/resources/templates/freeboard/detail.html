@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${post.title + ' | 국밥FC'}">자유게시판 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav>
+        <a th:href="@{/freeboards}">자유게시판 목록</a>
+        <a th:href="@{/mypage}">내 프로필</a>
+    </nav>
+</header>
+
+<main class="content-page">
+    <div class="alert success" th:if="${param.updated}">게시글을 수정했습니다.</div>
+    <article class="notice-detail">
+        <div class="notice-toolbar">
+            <a class="back-link" th:href="@{/freeboards}">← 목록으로</a>
+            <div class="admin-actions" th:if="${canManage}">
+                <a class="secondary-link" th:href="@{/freeboards/{id}/edit(id=${post.id})}">수정</a>
+                <form th:action="@{/freeboards/{id}/delete(id=${post.id})}" method="post"
+                      onsubmit="return confirm('이 게시글을 삭제하시겠습니까?');">
+                    <button class="danger-button" type="submit">삭제</button>
+                </form>
+            </div>
+        </div>
+        <header>
+            <p class="eyebrow">FREE BOARD</p>
+            <h1 th:text="${post.title}">게시글 제목</h1>
+            <div class="notice-meta">
+                <span th:text="${post.authorName}">작성자</span>
+                <time th:datetime="${post.createdAt}"
+                      th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd HH:mm')}">작성일</time>
+                <span th:if="${post.updatedAt != null}"
+                      th:text="|수정 ${#temporals.format(post.updatedAt, 'yyyy.MM.dd HH:mm')}|">수정일</span>
+            </div>
+        </header>
+        <div class="notice-content" th:text="${post.content}">게시글 내용</div>
+    </article>
+</main>
+</body>
+</html>

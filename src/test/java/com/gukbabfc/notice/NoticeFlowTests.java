@@ -188,4 +188,13 @@ class NoticeFlowTests {
         Notice savedNotice = noticeRepository.findById(notice.getId()).orElseThrow();
         assertThat(savedNotice.getTitle()).isEqualTo("원래 제목");
     }
+
+    @Test
+    @WithMockUser(username = "noticeuser", roles = "MEMBER")
+    void 존재하지_않는_공지사항은_404_안내_화면을_보여준다() throws Exception {
+        mockMvc.perform(get("/notices/999999"))
+                .andExpect(status().isNotFound())
+                .andExpect(view().name("error/404"))
+                .andExpect(model().attributeExists("message"));
+    }
 }

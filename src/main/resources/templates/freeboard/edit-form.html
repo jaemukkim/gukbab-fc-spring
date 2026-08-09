@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>게시글 수정 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav><a th:href="@{/freeboards/{id}(id=${postId})}">게시글로 돌아가기</a></nav>
+</header>
+
+<main class="content-page narrow-page">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">EDIT POST</p>
+            <h1>게시글 수정</h1>
+        </div>
+    </div>
+
+    <form class="notice-form" th:action="@{/freeboards/{id}/edit(id=${postId})}"
+          th:object="${freeBoardUpdateRequest}" method="post">
+        <div class="field">
+            <label for="title">제목</label>
+            <input id="title" type="text" th:field="*{title}" maxlength="200" autofocus>
+            <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+        </div>
+        <div class="field">
+            <label for="content">내용</label>
+            <textarea id="content" th:field="*{content}" maxlength="10000" rows="14"></textarea>
+            <p class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p>
+        </div>
+        <div class="form-actions">
+            <a class="secondary-link" th:href="@{/freeboards/{id}(id=${postId})}">취소</a>
+            <button class="primary-button" type="submit">수정 완료</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

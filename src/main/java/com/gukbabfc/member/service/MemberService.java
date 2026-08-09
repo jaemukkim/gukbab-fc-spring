@@ -6,6 +6,8 @@ import com.gukbabfc.member.dto.ProfileUpdateRequest;
 import com.gukbabfc.member.dto.SignupRequest;
 import com.gukbabfc.member.entity.Member;
 import com.gukbabfc.member.exception.SignupException;
+import com.gukbabfc.member.exception.MemberNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,15 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Transactional
     public void signup(SignupRequest request) {
@@ -65,7 +63,7 @@ public class MemberService {
 
     private Member findMember(String username) {
         return memberRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(MemberNotFoundException::new);
     }
 
     private String normalize(String value) {
