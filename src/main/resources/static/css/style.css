@@ -138,6 +138,22 @@ footer { padding: 4rem 5vw 2rem; color: #647184; }
 .schedule-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
 .schedule-facts div { display: grid; gap: .35rem; padding: 1rem; border-radius: .75rem; background: #f7f9fb; }
 .schedule-facts span { color: #647184; font-size: .85rem; }
+.participation-panel { margin-top: 1.5rem; padding: 2rem; border-radius: 1.25rem; background: var(--white); box-shadow: 0 18px 50px rgba(19, 35, 58, .08); }
+.participation-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
+.participation-heading h2 { margin: .25rem 0 0; }
+.participation-heading > p { margin: 0; color: #647184; }
+.participation-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin: 1.5rem 0; }
+.participation-actions form { display: contents; }
+.participation-button { padding: .9rem; border: 1px solid #cbd3dc; border-radius: .65rem; background: var(--white); color: var(--navy); cursor: pointer; font: inherit; font-weight: 800; }
+.participation-button.attending.active { border-color: #278c4d; background: #278c4d; color: var(--white); }
+.participation-button.not-attending.active { border-color: #c4473d; background: #c4473d; color: var(--white); }
+.participation-button.undecided.active { border-color: #647184; background: #647184; color: var(--white); }
+.participation-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+.participation-summary article { padding: 1rem; border-radius: .75rem; background: #f7f9fb; }
+.participation-summary h3 { margin: 0 0 .75rem; }
+.participation-summary h3 strong { color: var(--orange); }
+.participation-summary ul { margin: 0; padding-left: 1.25rem; }
+.participant-empty { margin: 0; color: #8b96a5; font-size: .88rem; }
 
 @media (max-width: 760px) {
     .site-header { align-items: flex-start; flex-direction: column; }
@@ -149,5 +165,6 @@ footer { padding: 4rem 5vw 2rem; color: #647184; }
     .board-search { flex-wrap: wrap; }
     .board-search input { flex-basis: 100%; }
     .pagination { flex-wrap: wrap; }
-    .schedule-grid, .schedule-facts { grid-template-columns: 1fr; }
+    .schedule-grid, .schedule-facts, .participation-summary { grid-template-columns: 1fr; }
+    .participation-heading { align-items: flex-start; flex-direction: column; }
 }

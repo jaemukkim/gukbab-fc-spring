@@ -3,9 +3,12 @@ package com.gukbabfc.schedule;
 import com.gukbabfc.member.dao.MemberRepository;
 import com.gukbabfc.member.entity.Member;
 import com.gukbabfc.schedule.dao.ScheduleRepository;
+import com.gukbabfc.schedule.dao.ScheduleParticipationRepository;
+import com.gukbabfc.schedule.dto.ParticipationSummary;
 import com.gukbabfc.schedule.dto.ScheduleDetail;
 import com.gukbabfc.schedule.dto.ScheduleListResponse;
 import com.gukbabfc.schedule.entity.Schedule;
+import com.gukbabfc.schedule.entity.ParticipationStatus;
 import com.gukbabfc.schedule.service.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +46,9 @@ class ScheduleFlowTests {
     private ScheduleRepository scheduleRepository;
 
     @Autowired
+    private ScheduleParticipationRepository participationRepository;
+
+    @Autowired
     private ScheduleService scheduleService;
 
     @Autowired
@@ -55,6 +61,7 @@ class ScheduleFlowTests {
 
     @BeforeEach
     void setUp() {
+        participationRepository.deleteAll();
         scheduleRepository.deleteAll();
         manager = memberRepository.findByUsername("schedulemanager")
                 .orElseGet(() -> memberRepository.save(
@@ -81,7 +88,7 @@ class ScheduleFlowTests {
         mockMvc.perform(get("/schedules/{id}", schedule.getId()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("schedule/detail"))
-                .andExpect(model().attributeExists("schedule"));
+                .andExpect(model().attributeExists("schedule", "participation", "participationRequest"));
     }
 
     @Test
@@ -139,6 +146,76 @@ class ScheduleFlowTests {
 
     @Test
     @WithMockUser(username = "schedulemanager", roles = "MEMBER")
+    void 회원은_일정에_참가_상태를_응답하고_변경할_수_있다() throws Exception {
+        Schedule schedule = saveSchedule("참가 응답 일정", LocalDateTime.now().plusDays(3));
+
+        mockMvc.perform(post("/schedules/{id}/participation", schedule.getId())
+                        .with(csrf())
+                        .param("status", "ATTENDING"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(
+                        "/schedules/" + schedule.getId() + "?participationUpdated"
+                ));
+
+        assertThat(participationRepository.count()).isEqualTo(1);
+        assertThat(participationRepository.findAll().getFirst().getStatus())
+                .isEqualTo(ParticipationStatus.ATTENDING);
+
+        mockMvc.perform(post("/schedules/{id}/participation", schedule.getId())
+                        .with(csrf())
+                        .param("status", "NOT_ATTENDING"))
+                .andExpect(status().is3xxRedirection());
+
+        assertThat(participationRepository.count()).isEqualTo(1);
+        assertThat(participationRepository.findAll().getFirst().getStatus())
+                .isEqualTo(ParticipationStatus.NOT_ATTENDING);
+    }
+
+    @Test
+    void 일정별_참가_상태와_회원_목록을_집계한다() {
+        Schedule schedule = saveSchedule("집계 일정", LocalDateTime.now().plusDays(3));
+        Member attendingMember = findOrCreateMember("attendingmember", "참가회원");
+        Member undecidedMember = findOrCreateMember("undecidedmember", "미정회원");
+
+        scheduleService.respondToSchedule(
+                schedule.getId(), manager.getUsername(), ParticipationStatus.ATTENDING
+        );
+        scheduleService.respondToSchedule(
+                schedule.getId(), attendingMember.getUsername(), ParticipationStatus.ATTENDING
+        );
+        scheduleService.respondToSchedule(
+                schedule.getId(), undecidedMember.getUsername(), ParticipationStatus.UNDECIDED
+        );
+
+        ParticipationSummary summary = scheduleService.getParticipationSummary(
+                schedule.getId(), manager.getUsername()
+        );
+
+        assertThat(summary.myStatus()).isEqualTo(ParticipationStatus.ATTENDING);
+        assertThat(summary.attendingCount()).isEqualTo(2);
+        assertThat(summary.notAttendingCount()).isZero();
+        assertThat(summary.undecidedCount()).isEqualTo(1);
+        assertThat(summary.attendingMembers())
+                .extracting(member -> member.name())
+                .containsExactly("일정담당", "참가회원");
+    }
+
+    @Test
+    @WithMockUser(username = "schedulemanager", roles = "MEMBER")
+    void 참가_상태가_없으면_응답을_저장하지_않는다() throws Exception {
+        Schedule schedule = saveSchedule("잘못된 응답 일정", LocalDateTime.now().plusDays(3));
+
+        mockMvc.perform(post("/schedules/{id}/participation", schedule.getId()).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(
+                        "/schedules/" + schedule.getId() + "?invalidParticipation"
+                ));
+
+        assertThat(participationRepository.count()).isZero();
+    }
+
+    @Test
+    @WithMockUser(username = "schedulemanager", roles = "MEMBER")
     void 일반_회원은_풋살_일정을_등록하거나_수정하거나_삭제할_수_없다() throws Exception {
         Schedule schedule = saveSchedule("관리자 일정", LocalDateTime.now().plusDays(3));
 
@@ -171,6 +248,9 @@ class ScheduleFlowTests {
     @WithMockUser(username = "schedulemanager", roles = "ADMIN")
     void 관리자는_풋살_일정을_수정하고_삭제할_수_있다() throws Exception {
         Schedule schedule = saveSchedule("수정 전 일정", LocalDateTime.now().plusDays(3));
+        scheduleService.respondToSchedule(
+                schedule.getId(), manager.getUsername(), ParticipationStatus.ATTENDING
+        );
 
         mockMvc.perform(get("/schedules/{id}/edit", schedule.getId()))
                 .andExpect(status().isOk())
@@ -193,6 +273,7 @@ class ScheduleFlowTests {
                 .andExpect(redirectedUrl("/schedules?deleted"));
 
         assertThat(scheduleRepository.existsById(schedule.getId())).isFalse();
+        assertThat(participationRepository.count()).isZero();
     }
 
     @Test
@@ -212,5 +293,12 @@ class ScheduleFlowTests {
                 "테스트 일정입니다.",
                 manager
         ));
+    }
+
+    private Member findOrCreateMember(String username, String name) {
+        return memberRepository.findByUsername(username)
+                .orElseGet(() -> memberRepository.save(
+                        new Member(username, passwordEncoder.encode("password1234"), name)
+                ));
     }
 }
