@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 자유게시글 내용과 작성자 관리 기능을 보여주는 상세 화면입니다. -->
+<!-- 자유게시글 내용과 댓글 작성·관리 기능을 보여주는 상세 화면입니다. -->
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -18,6 +18,10 @@
 
 <main class="content-page">
     <div class="alert success" th:if="${param.updated}">게시글을 수정했습니다.</div>
+    <div class="alert success" th:if="${param.commentCreated}">댓글을 등록했습니다.</div>
+    <div class="alert success" th:if="${param.commentUpdated}">댓글을 수정했습니다.</div>
+    <div class="alert success" th:if="${param.commentDeleted}">댓글을 삭제했습니다.</div>
+    <div class="alert error" th:if="${commentError}" th:text="${commentError}">댓글 오류</div>
     <article class="notice-detail">
         <div class="notice-toolbar">
             <a class="back-link" th:href="@{/freeboards}">← 목록으로</a>
@@ -42,6 +46,60 @@
         </header>
         <div class="notice-content" th:text="${post.content}">게시글 내용</div>
     </article>
+
+    <section class="comment-section">
+        <div class="comment-heading">
+            <div>
+                <p class="eyebrow">COMMENTS</p>
+                <h2>댓글 <span th:text="${commentCount}">0</span></h2>
+            </div>
+        </div>
+
+        <form class="comment-form" th:action="@{/freeboards/{id}/comments(id=${post.id})}"
+              th:object="${freeBoardCommentRequest}" method="post">
+            <div class="field">
+                <label for="commentContent">댓글 작성</label>
+                <textarea id="commentContent" th:field="*{content}" maxlength="1000" rows="3"
+                          placeholder="댓글을 입력해 주세요."></textarea>
+                <p class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></p>
+            </div>
+            <div class="form-actions">
+                <button class="primary-button" type="submit">댓글 등록</button>
+            </div>
+        </form>
+
+        <div class="empty-state comment-empty" th:if="${#lists.isEmpty(comments)}">
+            <p>첫 번째 댓글을 남겨보세요.</p>
+        </div>
+
+        <div class="comment-list" th:unless="${#lists.isEmpty(comments)}">
+            <article class="comment-item" th:each="comment : ${comments}">
+                <header>
+                    <strong th:text="${comment.authorName}">작성자</strong>
+                    <time th:datetime="${comment.createdAt}"
+                          th:text="${#temporals.format(comment.createdAt, 'yyyy.MM.dd HH:mm')}">작성일</time>
+                    <span th:if="${comment.updatedAt != null}">수정됨</span>
+                </header>
+                <p th:text="${comment.content}">댓글 내용</p>
+
+                <div class="comment-actions" th:if="${comment.canManage}">
+                    <details>
+                        <summary>수정</summary>
+                        <form th:action="@{/freeboards/{postId}/comments/{commentId}/edit(postId=${post.id}, commentId=${comment.id})}"
+                              method="post">
+                            <textarea name="content" maxlength="1000" rows="3"
+                                      th:text="${comment.content}"></textarea>
+                            <button class="secondary-button" type="submit">저장</button>
+                        </form>
+                    </details>
+                    <form th:action="@{/freeboards/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}"
+                          method="post" onsubmit="return confirm('이 댓글을 삭제하시겠습니까?');">
+                        <button class="danger-button" type="submit">삭제</button>
+                    </form>
+                </div>
+            </article>
+        </div>
+    </section>
 </main>
 </body>
 </html>

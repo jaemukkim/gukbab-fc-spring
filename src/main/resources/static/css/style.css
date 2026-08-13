@@ -116,6 +116,9 @@ footer { padding: 4rem 5vw 2rem; color: #647184; }
 .board-row:last-child { border-bottom: 0; }
 .board-row:hover { background: #f7f9fb; }
 .board-row span, .board-row time { color: #6b7788; font-size: .9rem; }
+.board-title { display: flex; align-items: center; gap: .55rem; }
+.board-title > span { color: var(--navy); font-size: inherit; }
+.board-title small { color: var(--orange); font-size: .78rem; }
 .board-search { display: flex; gap: .6rem; margin-bottom: 1rem; }
 .board-search input { flex: 1; min-width: 0; padding: .8rem 1rem; border: 1px solid #cbd3dc; border-radius: .6rem; font: inherit; }
 .board-search input:focus { border-color: var(--orange); outline: 3px solid rgba(228, 100, 45, .15); }
@@ -186,6 +189,21 @@ footer { padding: 4rem 5vw 2rem; color: #647184; }
 .uniform-application-table { width: 100%; border-collapse: collapse; }
 .uniform-application-table th, .uniform-application-table td { padding: .85rem; border-bottom: 1px solid #e7ebef; text-align: left; white-space: nowrap; }
 .uniform-application-table th { color: #647184; font-size: .85rem; }
+.comment-section { margin-top: 1.5rem; padding: 2rem; border-radius: 1.25rem; background: var(--white); box-shadow: 0 18px 50px rgba(19, 35, 58, .08); }
+.comment-heading h2 { margin: .25rem 0 1.25rem; }
+.comment-heading h2 span { color: var(--orange); }
+.comment-form { padding-bottom: 1.5rem; border-bottom: 1px solid #e7ebef; }
+.comment-list { display: grid; }
+.comment-item { padding: 1.25rem 0; border-bottom: 1px solid #e7ebef; }
+.comment-item:last-child { border-bottom: 0; }
+.comment-item header { display: flex; align-items: center; gap: .75rem; color: #647184; font-size: .85rem; }
+.comment-item header strong { color: var(--navy); font-size: 1rem; }
+.comment-item > p { margin: .8rem 0; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comment-actions { display: flex; justify-content: flex-end; align-items: flex-start; gap: .5rem; }
+.comment-actions summary { padding: .7rem .9rem; color: #647184; cursor: pointer; list-style: none; }
+.comment-actions details form { display: flex; gap: .5rem; width: min(520px, 70vw); margin-top: .5rem; }
+.comment-actions textarea { flex: 1; resize: vertical; padding: .75rem; border: 1px solid #cbd3dc; border-radius: .6rem; font: inherit; }
+.comment-empty { padding: 2rem 1rem; }
 
 @media (max-width: 760px) {
     .site-header { align-items: flex-start; flex-direction: column; }
@@ -205,4 +223,5 @@ footer { padding: 4rem 5vw 2rem; color: #647184; }
     .uniform-order-fields { grid-template-columns: 1fr; }
     .uniform-size-summary { grid-template-columns: repeat(2, 1fr); }
     .uniform-application-heading { align-items: flex-start; flex-direction: column; }
+    .comment-actions details form { align-items: stretch; flex-direction: column; width: 75vw; }
 }

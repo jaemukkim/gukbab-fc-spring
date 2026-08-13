@@ -11,14 +11,16 @@ public record FreeBoardListItem(
         Long id,
         String title,
         String authorName,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        long commentCount
 ) {
-    public static FreeBoardListItem from(FreeBoardPost post) {
+    public static FreeBoardListItem from(FreeBoardPost post, long commentCount) {
         return new FreeBoardListItem(
                 post.getId(),
                 post.getTitle(),
                 post.getAuthor().getName(),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                commentCount
         );
     }
 }

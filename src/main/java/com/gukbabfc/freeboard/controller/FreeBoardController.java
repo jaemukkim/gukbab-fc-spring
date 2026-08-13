@@ -1,8 +1,10 @@
 package com.gukbabfc.freeboard.controller;
 
 import com.gukbabfc.freeboard.dto.FreeBoardCreateRequest;
+import com.gukbabfc.freeboard.dto.FreeBoardCommentRequest;
 import com.gukbabfc.freeboard.dto.FreeBoardUpdateRequest;
 import com.gukbabfc.freeboard.service.FreeBoardService;
+import com.gukbabfc.freeboard.service.FreeBoardCommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * 자유게시판 목록과 게시글 CRUD 화면 요청을 처리합니다.
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class FreeBoardController {
 
     private final FreeBoardService freeBoardService;
+    private final FreeBoardCommentService commentService;
 
     @GetMapping
     public String list(@RequestParam(defaultValue = "0") int page,
@@ -39,9 +43,47 @@ public class FreeBoardController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Authentication authentication, Model model) {
-        model.addAttribute("post", freeBoardService.getPost(id));
-        model.addAttribute("canManage", freeBoardService.canManage(id, authentication.getName()));
+        populateDetailModel(id, authentication, model, new FreeBoardCommentRequest());
         return "freeboard/detail";
+    }
+
+    @PostMapping("/{id}/comments")
+    public String createComment(@PathVariable Long id,
+                                @Valid @ModelAttribute FreeBoardCommentRequest freeBoardCommentRequest,
+                                BindingResult bindingResult,
+                                Authentication authentication,
+                                Model model) {
+        if (bindingResult.hasErrors()) {
+            populateDetailModel(id, authentication, model, freeBoardCommentRequest);
+            return "freeboard/detail";
+        }
+        commentService.createComment(id, authentication.getName(), freeBoardCommentRequest);
+        return "redirect:/freeboards/" + id + "?commentCreated";
+    }
+
+    @PostMapping("/{postId}/comments/{commentId}/edit")
+    public String updateComment(@PathVariable Long postId,
+                                @PathVariable Long commentId,
+                                @Valid @ModelAttribute FreeBoardCommentRequest freeBoardCommentRequest,
+                                BindingResult bindingResult,
+                                Authentication authentication,
+                                RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("commentError", "댓글 내용을 입력해 주세요.");
+            return "redirect:/freeboards/" + postId;
+        }
+        commentService.updateComment(
+                postId, commentId, authentication.getName(), freeBoardCommentRequest
+        );
+        return "redirect:/freeboards/" + postId + "?commentUpdated";
+    }
+
+    @PostMapping("/{postId}/comments/{commentId}/delete")
+    public String deleteComment(@PathVariable Long postId,
+                                @PathVariable Long commentId,
+                                Authentication authentication) {
+        commentService.deleteComment(postId, commentId, authentication.getName());
+        return "redirect:/freeboards/" + postId + "?commentDeleted";
     }
 
     @GetMapping("/new")
@@ -87,5 +129,17 @@ public class FreeBoardController {
     public String delete(@PathVariable Long id, Authentication authentication) {
         freeBoardService.deletePost(id, authentication.getName());
         return "redirect:/freeboards?deleted";
+    }
+
+    private void populateDetailModel(Long id,
+                                     Authentication authentication,
+                                     Model model,
+                                     FreeBoardCommentRequest commentRequest) {
+        model.addAttribute("post", freeBoardService.getPost(id));
+        model.addAttribute("canManage", freeBoardService.canManage(id, authentication.getName()));
+        var comments = commentService.getComments(id, authentication.getName());
+        model.addAttribute("comments", comments);
+        model.addAttribute("commentCount", comments.size());
+        model.addAttribute("freeBoardCommentRequest", commentRequest);
     }
 }

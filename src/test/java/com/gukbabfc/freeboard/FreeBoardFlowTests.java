@@ -1,9 +1,11 @@
 package com.gukbabfc.freeboard;
 
 import com.gukbabfc.freeboard.dao.FreeBoardRepository;
+import com.gukbabfc.freeboard.dao.FreeBoardCommentRepository;
 import com.gukbabfc.freeboard.dto.FreeBoardDetail;
 import com.gukbabfc.freeboard.dto.FreeBoardListItem;
 import com.gukbabfc.freeboard.entity.FreeBoardPost;
+import com.gukbabfc.freeboard.entity.FreeBoardComment;
 import com.gukbabfc.freeboard.service.FreeBoardService;
 import com.gukbabfc.member.dao.MemberRepository;
 import com.gukbabfc.member.entity.Member;
@@ -42,6 +44,9 @@ class FreeBoardFlowTests {
     private FreeBoardRepository freeBoardRepository;
 
     @Autowired
+    private FreeBoardCommentRepository commentRepository;
+
+    @Autowired
     private FreeBoardService freeBoardService;
 
     @Autowired
@@ -56,6 +61,7 @@ class FreeBoardFlowTests {
 
     @BeforeEach
     void setUp() {
+        commentRepository.deleteAll();
         freeBoardRepository.deleteAll();
         author = findOrCreateMember("freeauthor", "작성자");
         otherMember = findOrCreateMember("othermember", "다른회원");
@@ -131,12 +137,14 @@ class FreeBoardFlowTests {
     @WithMockUser(username = "freeauthor", roles = "MEMBER")
     void 작성자는_자신의_게시글을_삭제할_수_있다() throws Exception {
         FreeBoardPost post = savePost("삭제할 글", "삭제할 내용");
+        saveComment(post, author, "함께 삭제할 댓글");
 
         mockMvc.perform(post("/freeboards/{id}/delete", post.getId()).with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/freeboards?deleted"));
 
         assertThat(freeBoardRepository.existsById(post.getId())).isFalse();
+        assertThat(commentRepository.count()).isZero();
     }
 
     @Test
@@ -225,6 +233,130 @@ class FreeBoardFlowTests {
                 .andExpect(model().attributeExists("postPage", "posts"));
     }
 
+    @Test
+    @WithMockUser(username = "freeauthor", roles = "MEMBER")
+    void 회원은_게시글에_댓글을_작성하고_조회할_수_있다() throws Exception {
+        FreeBoardPost post = savePost("댓글 게시글", "댓글을 작성합니다.");
+
+        mockMvc.perform(post("/freeboards/{id}/comments", post.getId())
+                        .with(csrf())
+                        .param("content", "  첫 댓글입니다.  "))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(
+                        "/freeboards/" + post.getId() + "?commentCreated"
+                ));
+
+        assertThat(commentRepository.count()).isEqualTo(1);
+        assertThat(commentRepository.findAll().getFirst().getContent()).isEqualTo("첫 댓글입니다.");
+        assertThat(freeBoardService.getPosts(0, "").getContent().getFirst().commentCount())
+                .isEqualTo(1);
+
+        mockMvc.perform(get("/freeboards/{id}", post.getId()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("freeboard/detail"))
+                .andExpect(model().attribute("commentCount", 1))
+                .andExpect(model().attributeExists("comments", "freeBoardCommentRequest"));
+    }
+
+    @Test
+    @WithMockUser(username = "freeauthor", roles = "MEMBER")
+    void 빈_내용으로는_댓글을_작성할_수_없다() throws Exception {
+        FreeBoardPost post = savePost("댓글 검증", "빈 댓글은 안 됩니다.");
+
+        mockMvc.perform(post("/freeboards/{id}/comments", post.getId())
+                        .with(csrf())
+                        .param("content", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("freeboard/detail"))
+                .andExpect(model().attributeHasFieldErrors(
+                        "freeBoardCommentRequest", "content"
+                ));
+
+        assertThat(commentRepository.count()).isZero();
+    }
+
+    @Test
+    @WithMockUser(username = "freeauthor", roles = "MEMBER")
+    void 댓글_작성자는_자신의_댓글을_수정하고_삭제할_수_있다() throws Exception {
+        FreeBoardPost post = savePost("댓글 관리", "작성자 권한 테스트");
+        FreeBoardComment comment = saveComment(post, author, "수정 전 댓글");
+
+        mockMvc.perform(post("/freeboards/{postId}/comments/{commentId}/edit",
+                        post.getId(), comment.getId())
+                        .with(csrf())
+                        .param("content", "  수정된 댓글  "))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(
+                        "/freeboards/" + post.getId() + "?commentUpdated"
+                ));
+
+        FreeBoardComment updated = commentRepository.findById(comment.getId()).orElseThrow();
+        assertThat(updated.getContent()).isEqualTo("수정된 댓글");
+        assertThat(updated.getUpdatedAt()).isNotNull();
+
+        mockMvc.perform(post("/freeboards/{postId}/comments/{commentId}/delete",
+                        post.getId(), comment.getId()).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(
+                        "/freeboards/" + post.getId() + "?commentDeleted"
+                ));
+
+        assertThat(commentRepository.existsById(comment.getId())).isFalse();
+    }
+
+    @Test
+    @WithMockUser(username = "othermember", roles = "MEMBER")
+    void 다른_회원의_댓글은_수정하거나_삭제할_수_없다() throws Exception {
+        FreeBoardPost post = savePost("타인 댓글", "권한 테스트");
+        FreeBoardComment comment = saveComment(post, author, "작성자 댓글");
+
+        mockMvc.perform(post("/freeboards/{postId}/comments/{commentId}/edit",
+                        post.getId(), comment.getId())
+                        .with(csrf())
+                        .param("content", "권한 없는 수정"))
+                .andExpect(status().isForbidden())
+                .andExpect(forwardedUrl("/access-denied"));
+
+        mockMvc.perform(post("/freeboards/{postId}/comments/{commentId}/delete",
+                        post.getId(), comment.getId()).with(csrf()))
+                .andExpect(status().isForbidden())
+                .andExpect(forwardedUrl("/access-denied"));
+
+        assertThat(commentRepository.findById(comment.getId()).orElseThrow().getContent())
+                .isEqualTo("작성자 댓글");
+    }
+
+    @Test
+    @WithMockUser(username = "freeadmin", roles = "ADMIN")
+    void 관리자는_다른_회원의_댓글을_삭제할_수_있다() throws Exception {
+        FreeBoardPost post = savePost("관리자 댓글", "관리자 권한 테스트");
+        FreeBoardComment comment = saveComment(post, author, "삭제 대상 댓글");
+
+        mockMvc.perform(post("/freeboards/{postId}/comments/{commentId}/delete",
+                        post.getId(), comment.getId()).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+
+        assertThat(commentRepository.existsById(comment.getId())).isFalse();
+    }
+
+    @Test
+    @WithMockUser(username = "freeauthor", roles = "MEMBER")
+    void 다른_게시글의_댓글_ID로는_수정할_수_없다() throws Exception {
+        FreeBoardPost firstPost = savePost("첫 게시글", "첫 내용");
+        FreeBoardPost secondPost = savePost("둘째 게시글", "둘째 내용");
+        FreeBoardComment comment = saveComment(firstPost, author, "첫 게시글 댓글");
+
+        mockMvc.perform(post("/freeboards/{postId}/comments/{commentId}/edit",
+                        secondPost.getId(), comment.getId())
+                        .with(csrf())
+                        .param("content", "잘못된 수정"))
+                .andExpect(status().isNotFound())
+                .andExpect(view().name("error/404"));
+
+        assertThat(commentRepository.findById(comment.getId()).orElseThrow().getContent())
+                .isEqualTo("첫 게시글 댓글");
+    }
+
     private Member findOrCreateMember(String username, String name) {
         return memberRepository.findByUsername(username)
                 .orElseGet(() -> memberRepository.save(
@@ -234,5 +366,9 @@ class FreeBoardFlowTests {
 
     private FreeBoardPost savePost(String title, String content) {
         return freeBoardRepository.save(new FreeBoardPost(title, content, author));
+    }
+
+    private FreeBoardComment saveComment(FreeBoardPost post, Member commentAuthor, String content) {
+        return commentRepository.save(new FreeBoardComment(post, commentAuthor, content));
     }
 }

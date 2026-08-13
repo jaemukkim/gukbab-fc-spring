@@ -1,6 +1,7 @@
 package com.gukbabfc.freeboard.service;
 
 import com.gukbabfc.freeboard.dao.FreeBoardRepository;
+import com.gukbabfc.freeboard.dao.FreeBoardCommentRepository;
 import com.gukbabfc.freeboard.dto.FreeBoardCreateRequest;
 import com.gukbabfc.freeboard.dto.FreeBoardDetail;
 import com.gukbabfc.freeboard.dto.FreeBoardListItem;
@@ -20,6 +21,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 자유게시글 CRUD, 검색, 작성자 권한 업무 규칙을 처리합니다.
  */
@@ -30,6 +34,7 @@ public class FreeBoardService {
     private static final int PAGE_SIZE = 10;
 
     private final FreeBoardRepository freeBoardRepository;
+    private final FreeBoardCommentRepository commentRepository;
     private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
@@ -49,7 +54,11 @@ public class FreeBoardService {
                         pageable
                 );
 
-        return posts.map(FreeBoardListItem::from);
+        Map<Long, Long> commentCounts = getCommentCounts(posts);
+        return posts.map(post -> FreeBoardListItem.from(
+                post,
+                commentCounts.getOrDefault(post.getId(), 0L)
+        ));
     }
 
     @Transactional(readOnly = true)
@@ -86,6 +95,7 @@ public class FreeBoardService {
     public void deletePost(Long id, String username) {
         FreeBoardPost post = findPost(id);
         validateManager(post, username);
+        commentRepository.deleteAllByPostId(id);
         freeBoardRepository.delete(post);
     }
 
@@ -116,5 +126,17 @@ public class FreeBoardService {
     private Member findMember(String username) {
         return memberRepository.findByUsername(username)
                 .orElseThrow(MemberNotFoundException::new);
+    }
+
+    private Map<Long, Long> getCommentCounts(Page<FreeBoardPost> posts) {
+        Map<Long, Long> commentCounts = new HashMap<>();
+        if (posts.isEmpty()) {
+            return commentCounts;
+        }
+        var postIds = posts.getContent().stream().map(FreeBoardPost::getId).toList();
+        commentRepository.countByPostIds(postIds).forEach(count ->
+                commentCounts.put(count.getPostId(), count.getCommentCount())
+        );
+        return commentCounts;
     }
 }
