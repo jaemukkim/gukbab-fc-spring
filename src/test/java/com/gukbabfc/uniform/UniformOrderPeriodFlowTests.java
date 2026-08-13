@@ -3,9 +3,14 @@ package com.gukbabfc.uniform;
 import com.gukbabfc.member.dao.MemberRepository;
 import com.gukbabfc.member.entity.Member;
 import com.gukbabfc.uniform.dao.UniformOrderPeriodRepository;
+import com.gukbabfc.uniform.dao.UniformApplicationRepository;
+import com.gukbabfc.uniform.dto.UniformApplicationSummary;
 import com.gukbabfc.uniform.dto.UniformOrderPeriodView;
 import com.gukbabfc.uniform.entity.UniformOrderPeriod;
 import com.gukbabfc.uniform.entity.UniformOrderStatus;
+import com.gukbabfc.uniform.entity.UniformSize;
+import com.gukbabfc.uniform.dto.UniformApplicationRequest;
+import com.gukbabfc.uniform.service.UniformApplicationService;
 import com.gukbabfc.uniform.service.UniformOrderPeriodService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +28,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
@@ -43,7 +49,13 @@ class UniformOrderPeriodFlowTests {
     private UniformOrderPeriodRepository periodRepository;
 
     @Autowired
+    private UniformApplicationRepository applicationRepository;
+
+    @Autowired
     private UniformOrderPeriodService periodService;
+
+    @Autowired
+    private UniformApplicationService applicationService;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -55,6 +67,7 @@ class UniformOrderPeriodFlowTests {
 
     @BeforeEach
     void setUp() {
+        applicationRepository.deleteAll();
         periodRepository.deleteAll();
         manager = memberRepository.findByUsername("uniformmanager")
                 .orElseGet(() -> memberRepository.save(
@@ -81,7 +94,9 @@ class UniformOrderPeriodFlowTests {
         mockMvc.perform(get("/uniform-orders/{id}", period.getId()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("uniform/detail"))
-                .andExpect(model().attributeExists("period"));
+                .andExpect(model().attributeExists(
+                        "period", "uniformApplicationRequest", "uniformSizes"
+                ));
 
         assertThat(periodService.getPeriod(period.getId()).status())
                 .isEqualTo(UniformOrderStatus.OPEN);
@@ -197,6 +212,116 @@ class UniformOrderPeriodFlowTests {
                 .andExpect(model().attributeExists("message"));
     }
 
+    @Test
+    @WithMockUser(username = "uniformmanager", roles = "MEMBER")
+    void 회원은_유니폼을_신청하고_기존_신청을_수정할_수_있다() throws Exception {
+        UniformOrderPeriod period = saveOpenPeriod("회원 신청");
+
+        mockMvc.perform(post("/uniform-orders/{id}/application", period.getId())
+                        .with(csrf())
+                        .param("size", "L")
+                        .param("backNumber", "10")
+                        .param("markingName", "  KIM  ")
+                        .param("quantity", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(
+                        "/uniform-orders/" + period.getId() + "?applicationSaved"
+                ));
+
+        assertThat(applicationRepository.count()).isEqualTo(1);
+        assertThat(applicationRepository.findAll().getFirst().getMarkingName()).isEqualTo("KIM");
+
+        mockMvc.perform(post("/uniform-orders/{id}/application", period.getId())
+                        .with(csrf())
+                        .param("size", "XL")
+                        .param("backNumber", "7")
+                        .param("markingName", "PARK")
+                        .param("quantity", "2"))
+                .andExpect(status().is3xxRedirection());
+
+        assertThat(applicationRepository.count()).isEqualTo(1);
+        assertThat(applicationRepository.findAll().getFirst().getSize()).isEqualTo(UniformSize.XL);
+        assertThat(applicationRepository.findAll().getFirst().getQuantity()).isEqualTo(2);
+        assertThat(applicationService.getMyApplication(period.getId(), manager.getUsername()))
+                .isPresent();
+    }
+
+    @Test
+    @WithMockUser(username = "uniformmanager", roles = "MEMBER")
+    void 회원은_신청_기간_중에_자신의_신청을_취소할_수_있다() throws Exception {
+        UniformOrderPeriod period = saveOpenPeriod("취소 신청");
+        apply(period, manager, UniformSize.M, 9, "KIM", 1);
+
+        mockMvc.perform(post("/uniform-orders/{id}/application/cancel", period.getId())
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(
+                        "/uniform-orders/" + period.getId() + "?applicationCancelled"
+                ));
+
+        assertThat(applicationRepository.count()).isZero();
+    }
+
+    @Test
+    @WithMockUser(username = "uniformmanager", roles = "MEMBER")
+    void 잘못된_유니폼_신청값은_상세_화면에서_검증_오류를_보여준다() throws Exception {
+        UniformOrderPeriod period = saveOpenPeriod("입력 검증 신청");
+
+        mockMvc.perform(post("/uniform-orders/{id}/application", period.getId())
+                        .with(csrf())
+                        .param("size", "")
+                        .param("backNumber", "100")
+                        .param("markingName", "")
+                        .param("quantity", "0"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("uniform/detail"))
+                .andExpect(model().attributeHasFieldErrors(
+                        "uniformApplicationRequest", "size", "backNumber", "markingName", "quantity"
+                ));
+
+        assertThat(applicationRepository.count()).isZero();
+    }
+
+    @Test
+    @WithMockUser(username = "uniformmanager", roles = "MEMBER")
+    void 마감된_기간에는_직접_요청해도_신청할_수_없다() throws Exception {
+        UniformOrderPeriod period = saveOpenPeriod("마감 신청");
+        period.close();
+        periodRepository.save(period);
+
+        mockMvc.perform(post("/uniform-orders/{id}/application", period.getId())
+                        .with(csrf())
+                        .param("size", "L")
+                        .param("backNumber", "10")
+                        .param("markingName", "KIM")
+                        .param("quantity", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/uniform-orders/" + period.getId()))
+                .andExpect(flash().attributeExists("applicationError"));
+
+        assertThat(applicationRepository.count()).isZero();
+    }
+
+    @Test
+    @WithMockUser(username = "uniformmanager", roles = "ADMIN")
+    void 관리자는_전체_신청과_사이즈별_수량을_집계해서_조회한다() throws Exception {
+        UniformOrderPeriod period = saveOpenPeriod("관리자 집계");
+        Member secondMember = findOrCreateMember("uniformmember", "두번째회원");
+        apply(period, manager, UniformSize.L, 10, "KIM", 2);
+        apply(period, secondMember, UniformSize.L, 20, "LEE", 1);
+
+        UniformApplicationSummary summary = applicationService.getSummary(period.getId());
+        assertThat(summary.applications()).hasSize(2);
+        assertThat(summary.quantityBySize().get(UniformSize.L)).isEqualTo(3);
+        assertThat(summary.quantityBySize().get(UniformSize.XL)).isZero();
+        assertThat(summary.totalQuantity()).isEqualTo(3);
+
+        mockMvc.perform(get("/uniform-orders/{id}", period.getId()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("uniform/detail"))
+                .andExpect(model().attributeExists("applicationSummary"));
+    }
+
     private UniformOrderPeriod saveOpenPeriod(String title) {
         return periodRepository.save(new UniformOrderPeriod(
                 title,
@@ -205,5 +330,22 @@ class UniformOrderPeriodFlowTests {
                 LocalDateTime.now().plusDays(7),
                 manager
         ));
+    }
+
+    private void apply(UniformOrderPeriod period, Member member, UniformSize size,
+                       int backNumber, String markingName, int quantity) {
+        UniformApplicationRequest request = new UniformApplicationRequest();
+        request.setSize(size);
+        request.setBackNumber(backNumber);
+        request.setMarkingName(markingName);
+        request.setQuantity(quantity);
+        applicationService.apply(period.getId(), member.getUsername(), request);
+    }
+
+    private Member findOrCreateMember(String username, String name) {
+        return memberRepository.findByUsername(username)
+                .orElseGet(() -> memberRepository.save(
+                        new Member(username, passwordEncoder.encode("password1234"), name)
+                ));
     }
 }

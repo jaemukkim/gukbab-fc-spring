@@ -34,12 +34,11 @@ public record UniformOrderPeriodView(
     }
 
     private static UniformOrderStatus resolveStatus(UniformOrderPeriod period, LocalDateTime now) {
-        if (period.isClosed() || !now.isBefore(period.getEndsAt())) {
-            return UniformOrderStatus.CLOSED;
+        if (period.isOpenAt(now)) {
+            return UniformOrderStatus.OPEN;
         }
-        if (now.isBefore(period.getStartsAt())) {
-            return UniformOrderStatus.UPCOMING;
-        }
-        return UniformOrderStatus.OPEN;
+        return now.isBefore(period.getStartsAt()) && !period.isClosed()
+                ? UniformOrderStatus.UPCOMING
+                : UniformOrderStatus.CLOSED;
     }
 }

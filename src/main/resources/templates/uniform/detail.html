@@ -19,6 +19,9 @@
     <div class="alert success" th:if="${param.updated}">신청 기간을 수정했습니다.</div>
     <div class="alert success" th:if="${param.closed}">유니폼 신청을 마감했습니다.</div>
     <div class="alert success" th:if="${param.reopened}">유니폼 신청을 다시 열었습니다.</div>
+    <div class="alert success" th:if="${param.applicationSaved}">유니폼 신청을 저장했습니다.</div>
+    <div class="alert success" th:if="${param.applicationCancelled}">유니폼 신청을 취소했습니다.</div>
+    <div class="alert error" th:if="${applicationError}" th:text="${applicationError}">신청 오류</div>
 
     <article class="notice-detail uniform-detail">
         <div class="notice-toolbar">
@@ -62,16 +65,104 @@
             신청 안내
         </div>
 
-        <div class="uniform-application-placeholder" th:if="${period.status.name() == 'OPEN'}">
-            <strong>현재 신청 기간입니다.</strong>
-            <p>사이즈와 마킹 정보를 입력하는 구매 신청 기능은 다음 단계에서 추가됩니다.</p>
-        </div>
+        <section class="uniform-application-panel" th:if="${period.status.name() == 'OPEN'}">
+            <div class="uniform-application-heading">
+                <div>
+                    <p class="eyebrow">MY ORDER</p>
+                    <h2 th:text="${myApplication == null ? '구매 신청' : '내 신청 수정'}">구매 신청</h2>
+                </div>
+                <span th:if="${myApplication != null}">신청 완료</span>
+            </div>
+
+            <form class="uniform-application-form"
+                  th:action="@{/uniform-orders/{id}/application(id=${period.id})}"
+                  th:object="${uniformApplicationRequest}" method="post">
+                <div class="field-row uniform-order-fields">
+                    <div class="field">
+                        <label for="size">사이즈</label>
+                        <select id="size" th:field="*{size}">
+                            <option value="">선택</option>
+                            <option th:each="sizeOption : ${uniformSizes}"
+                                    th:value="${sizeOption}" th:text="${sizeOption.label}">L</option>
+                        </select>
+                        <p class="field-error" th:if="${#fields.hasErrors('size')}" th:errors="*{size}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="backNumber">등번호</label>
+                        <input id="backNumber" type="number" th:field="*{backNumber}" min="0" max="99">
+                        <p class="field-error" th:if="${#fields.hasErrors('backNumber')}" th:errors="*{backNumber}"></p>
+                    </div>
+                </div>
+                <div class="field-row uniform-order-fields">
+                    <div class="field">
+                        <label for="markingName">마킹 이름</label>
+                        <input id="markingName" type="text" th:field="*{markingName}" maxlength="20"
+                               placeholder="예: KIM">
+                        <p class="field-error" th:if="${#fields.hasErrors('markingName')}" th:errors="*{markingName}"></p>
+                    </div>
+                    <div class="field">
+                        <label for="quantity">수량</label>
+                        <input id="quantity" type="number" th:field="*{quantity}" min="1" max="10">
+                        <p class="field-error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></p>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="primary-button" type="submit"
+                            th:text="${myApplication == null ? '신청하기' : '수정하기'}">신청하기</button>
+                </div>
+            </form>
+
+            <form class="uniform-cancel-form" th:if="${myApplication != null}"
+                  th:action="@{/uniform-orders/{id}/application/cancel(id=${period.id})}" method="post"
+                  onsubmit="return confirm('유니폼 구매 신청을 취소하시겠습니까?');">
+                <button class="danger-button" type="submit">신청 취소</button>
+            </form>
+        </section>
+
         <div class="uniform-application-placeholder closed" th:unless="${period.status.name() == 'OPEN'}">
             <strong th:text="${period.status.name() == 'UPCOMING' ? '아직 신청 기간이 아닙니다.' : '신청이 마감되었습니다.'}">
                 신청 상태
             </strong>
+            <p th:if="${myApplication != null}"
+               th:text="|내 신청: ${myApplication.size.label} / ${myApplication.backNumber}번 / ${myApplication.markingName} / ${myApplication.quantity}개|">
+                내 신청 정보
+            </p>
         </div>
     </article>
+
+    <section class="uniform-admin-summary" sec:authorize="hasRole('ADMIN')">
+        <div class="uniform-application-heading">
+            <div><p class="eyebrow">ORDER SUMMARY</p><h2>전체 신청 현황</h2></div>
+            <strong th:text="|총 ${applicationSummary.totalQuantity}개|">총 0개</strong>
+        </div>
+
+        <div class="uniform-size-summary">
+            <div th:each="sizeOption : ${uniformSizes}">
+                <span th:text="${sizeOption.label}">L</span>
+                <strong th:text="|${applicationSummary.quantityBySize.get(sizeOption)}개|">0개</strong>
+            </div>
+        </div>
+
+        <div class="empty-state schedule-empty" th:if="${#lists.isEmpty(applicationSummary.applications)}">
+            <p>아직 유니폼 신청자가 없습니다.</p>
+        </div>
+        <div class="uniform-application-table-wrap" th:unless="${#lists.isEmpty(applicationSummary.applications)}">
+            <table class="uniform-application-table">
+                <thead>
+                <tr><th>신청자</th><th>사이즈</th><th>등번호</th><th>마킹</th><th>수량</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="orderApplication : ${applicationSummary.applications}">
+                    <td th:text="${orderApplication.memberName}">회원</td>
+                    <td th:text="${orderApplication.size.label}">L</td>
+                    <td th:text="${orderApplication.backNumber}">10</td>
+                    <td th:text="${orderApplication.markingName}">KIM</td>
+                    <td th:text="|${orderApplication.quantity}개|">1개</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </main>
 </body>
 </html>

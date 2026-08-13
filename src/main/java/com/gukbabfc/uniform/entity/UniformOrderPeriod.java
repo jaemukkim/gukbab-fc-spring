@@ -79,4 +79,8 @@ public class UniformOrderPeriod {
         this.closed = false;
         this.updatedAt = LocalDateTime.now();
     }
+
+    public boolean isOpenAt(LocalDateTime dateTime) {
+        return !closed && !dateTime.isBefore(startsAt) && dateTime.isBefore(endsAt);
+    }
 }
