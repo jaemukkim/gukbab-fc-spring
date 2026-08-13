@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- 관리자가 새로운 유니폼 구매 신청 기간을 등록하는 화면입니다. -->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>유니폼 신청 기간 등록 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav><a th:href="@{/uniform-orders}">유니폼 신청 목록</a></nav>
+</header>
+
+<main class="content-page narrow-page">
+    <div class="page-heading">
+        <div><p class="eyebrow">NEW UNIFORM ORDER</p><h1>신청 기간 등록</h1></div>
+    </div>
+
+    <form class="notice-form" th:action="@{/uniform-orders}"
+          th:object="${uniformOrderPeriodRequest}" method="post">
+        <div class="field">
+            <label for="title">신청 제목</label>
+            <input id="title" type="text" th:field="*{title}" maxlength="100" autofocus>
+            <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+        </div>
+        <div class="field-row">
+            <div class="field">
+                <label for="startsAt">신청 시작</label>
+                <input id="startsAt" type="datetime-local" th:field="*{startsAt}" step="60">
+                <p class="field-error" th:if="${#fields.hasErrors('startsAt')}" th:errors="*{startsAt}"></p>
+            </div>
+            <div class="field">
+                <label for="endsAt">신청 마감</label>
+                <input id="endsAt" type="datetime-local" th:field="*{endsAt}" step="60">
+                <p class="field-error" th:if="${#fields.hasErrors('endsAt')}" th:errors="*{endsAt}"></p>
+            </div>
+        </div>
+        <p class="field-error" th:if="${#fields.hasErrors('periodValid')}" th:errors="*{periodValid}"></p>
+        <div class="field">
+            <label for="description">신청 안내</label>
+            <textarea id="description" th:field="*{description}" maxlength="3000" rows="10"></textarea>
+            <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
+        </div>
+        <div class="form-actions">
+            <a class="secondary-link" th:href="@{/uniform-orders}">취소</a>
+            <button class="primary-button" type="submit">등록하기</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

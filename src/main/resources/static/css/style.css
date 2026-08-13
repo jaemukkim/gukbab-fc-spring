@@ -154,6 +154,22 @@ footer { padding: 4rem 5vw 2rem; color: #647184; }
 .participation-summary h3 strong { color: var(--orange); }
 .participation-summary ul { margin: 0; padding-left: 1.25rem; }
 .participant-empty { margin: 0; color: #8b96a5; font-size: .88rem; }
+.uniform-period-list { display: grid; gap: 1rem; }
+.uniform-period-card { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.5rem; border: 1px solid #dce2e8; border-radius: 1rem; background: var(--white); color: var(--navy); text-decoration: none; box-shadow: 0 10px 30px rgba(19, 35, 58, .05); }
+.uniform-period-card:hover { border-color: var(--orange); }
+.uniform-period-card h2 { margin: .65rem 0 0; }
+.status-badge { display: inline-block; padding: .35rem .65rem; border-radius: 999px; background: #edf0f4; color: #536173; font-size: .8rem; font-weight: 900; }
+.status-badge.open { background: #e7f6ec; color: #176c37; }
+.status-badge.upcoming { background: #fff1dc; color: #9c531a; }
+.status-badge.closed { background: #edf0f4; color: #647184; }
+.uniform-period-dates { display: grid; gap: .35rem; min-width: 280px; text-align: right; }
+.uniform-period-dates span { color: #647184; font-size: .85rem; }
+.uniform-period-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+.uniform-period-facts div { display: grid; gap: .35rem; padding: 1rem; border-radius: .75rem; background: #f7f9fb; }
+.uniform-period-facts span { color: #647184; font-size: .85rem; }
+.uniform-application-placeholder { padding: 1.25rem; border-radius: .75rem; background: #e7f6ec; color: #176c37; }
+.uniform-application-placeholder p { margin: .4rem 0 0; }
+.uniform-application-placeholder.closed { background: #edf0f4; color: #647184; }
 
 @media (max-width: 760px) {
     .site-header { align-items: flex-start; flex-direction: column; }
@@ -167,4 +183,7 @@ footer { padding: 4rem 5vw 2rem; color: #647184; }
     .pagination { flex-wrap: wrap; }
     .schedule-grid, .schedule-facts, .participation-summary { grid-template-columns: 1fr; }
     .participation-heading { align-items: flex-start; flex-direction: column; }
+    .uniform-period-card { align-items: flex-start; flex-direction: column; }
+    .uniform-period-dates { min-width: 0; text-align: left; }
+    .uniform-period-facts { grid-template-columns: 1fr; }
 }

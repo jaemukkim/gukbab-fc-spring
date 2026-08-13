@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!-- 유니폼 구매 신청 기간과 현재 진행 상태를 보여주는 목록 화면입니다. -->
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>유니폼 신청 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav>
+        <a th:href="@{/schedules}">풋살 일정</a>
+        <a th:href="@{/mypage}">내 프로필</a>
+    </nav>
+</header>
+
+<main class="content-page">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">UNIFORM ORDER</p>
+            <h1>유니폼 신청</h1>
+        </div>
+        <a class="primary-link" th:href="@{/uniform-orders/new}"
+           sec:authorize="hasRole('ADMIN')">신청 기간 등록</a>
+    </div>
+
+    <section class="uniform-period-list">
+        <div class="empty-state" th:if="${#lists.isEmpty(periods)}">
+            <h2>등록된 신청 기간이 없습니다.</h2>
+            <p>새로운 유니폼 구매 신청이 등록되면 이곳에 표시됩니다.</p>
+        </div>
+
+        <a class="uniform-period-card" th:each="period : ${periods}"
+           th:href="@{/uniform-orders/{id}(id=${period.id})}">
+            <div>
+                <span class="status-badge"
+                      th:classappend="${period.status.name().toLowerCase()}"
+                      th:text="${period.status.label}">신청 중</span>
+                <h2 th:text="${period.title}">2026 홈 유니폼 신청</h2>
+            </div>
+            <div class="uniform-period-dates">
+                <span>신청 기간</span>
+                <strong th:text="|${#temporals.format(period.startsAt, 'yyyy.MM.dd HH:mm')} ~ ${#temporals.format(period.endsAt, 'yyyy.MM.dd HH:mm')}|">
+                    신청 기간
+                </strong>
+            </div>
+        </a>
+    </section>
+</main>
+</body>
+</html>

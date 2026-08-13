@@ -31,6 +31,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/notices", "/notices/*/edit", "/notices/*/delete").hasRole("ADMIN")
                         .requestMatchers("/schedules/new", "/schedules/*/edit").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/schedules", "/schedules/*/edit", "/schedules/*/delete").hasRole("ADMIN")
+                        .requestMatchers("/uniform-orders/new", "/uniform-orders/*/edit").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/uniform-orders", "/uniform-orders/*/edit",
+                                "/uniform-orders/*/close", "/uniform-orders/*/reopen").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login

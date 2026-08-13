@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!-- 유니폼 신청 기간의 상세 안내와 관리자 상태 변경 기능을 보여줍니다. -->
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${period.title + ' | 국밥FC'}">유니폼 신청 | 국밥FC</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="simple-header">
+    <a class="brand" th:href="@{/}">국밥FC</a>
+    <nav><a th:href="@{/uniform-orders}">유니폼 신청 목록</a></nav>
+</header>
+
+<main class="content-page narrow-page">
+    <div class="alert success" th:if="${param.updated}">신청 기간을 수정했습니다.</div>
+    <div class="alert success" th:if="${param.closed}">유니폼 신청을 마감했습니다.</div>
+    <div class="alert success" th:if="${param.reopened}">유니폼 신청을 다시 열었습니다.</div>
+
+    <article class="notice-detail uniform-detail">
+        <div class="notice-toolbar">
+            <a class="back-link" th:href="@{/uniform-orders}">← 목록으로</a>
+            <div class="admin-actions" sec:authorize="hasRole('ADMIN')">
+                <a class="secondary-link" th:href="@{/uniform-orders/{id}/edit(id=${period.id})}">수정</a>
+                <form th:if="${period.status.name() != 'CLOSED'}"
+                      th:action="@{/uniform-orders/{id}/close(id=${period.id})}" method="post"
+                      onsubmit="return confirm('유니폼 신청을 마감하시겠습니까?');">
+                    <button class="danger-button" type="submit">마감</button>
+                </form>
+                <form th:if="${period.status.name() == 'CLOSED'}"
+                      th:action="@{/uniform-orders/{id}/reopen(id=${period.id})}" method="post">
+                    <button class="secondary-button" type="submit">재오픈</button>
+                </form>
+            </div>
+        </div>
+
+        <header>
+            <span class="status-badge" th:classappend="${period.status.name().toLowerCase()}"
+                  th:text="${period.status.label}">신청 중</span>
+            <h1 th:text="${period.title}">2026 홈 유니폼 신청</h1>
+            <div class="uniform-period-facts">
+                <div>
+                    <span>시작</span>
+                    <strong th:text="${#temporals.format(period.startsAt, 'yyyy년 MM월 dd일 HH:mm')}">시작 시각</strong>
+                </div>
+                <div>
+                    <span>마감</span>
+                    <strong th:text="${#temporals.format(period.endsAt, 'yyyy년 MM월 dd일 HH:mm')}">마감 시각</strong>
+                </div>
+            </div>
+            <div class="notice-meta">
+                <span th:text="|등록 ${period.createdByName}|">등록자</span>
+                <span th:if="${period.updatedAt != null}"
+                      th:text="|수정 ${#temporals.format(period.updatedAt, 'yyyy.MM.dd HH:mm')}|">수정일</span>
+            </div>
+        </header>
+        <div class="notice-content"
+             th:text="${period.description != null ? period.description : '등록된 신청 안내가 없습니다.'}">
+            신청 안내
+        </div>
+
+        <div class="uniform-application-placeholder" th:if="${period.status.name() == 'OPEN'}">
+            <strong>현재 신청 기간입니다.</strong>
+            <p>사이즈와 마킹 정보를 입력하는 구매 신청 기능은 다음 단계에서 추가됩니다.</p>
+        </div>
+        <div class="uniform-application-placeholder closed" th:unless="${period.status.name() == 'OPEN'}">
+            <strong th:text="${period.status.name() == 'UPCOMING' ? '아직 신청 기간이 아닙니다.' : '신청이 마감되었습니다.'}">
+                신청 상태
+            </strong>
+        </div>
+    </article>
+</main>
+</body>
+</html>
