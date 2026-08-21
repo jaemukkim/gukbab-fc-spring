@@ -15,7 +15,6 @@
         <a th:href="@{/freeboards}">자유게시판</a>
         <a th:href="@{/players}">선수 프로필</a>
         <a th:href="@{/schedules}">풋살 일정</a>
-        <a href="#">경기 결과</a>
         <a th:href="@{/uniform-orders}">유니폼 신청</a>
     </nav>
     <div class="auth-menu">
@@ -36,13 +35,83 @@
     <section class="hero">
         <p class="eyebrow">든든하게 뛰고, 맛있게 먹자</p>
         <h1>국밥FC 팀 카페</h1>
-        <p>우리 팀의 소식과 경기 일정을 함께 나누는 공간입니다.</p>
+        <p th:if="${signedIn}">오늘 확인할 팀 소식과 일정을 한곳에서 살펴보세요.</p>
+        <p th:unless="${signedIn}">우리 팀의 소식과 경기 일정을 함께 나누는 공간입니다.</p>
     </section>
 
-    <section class="placeholder-grid" aria-label="준비 중인 기능">
-        <article><h2>다음 경기</h2><p>풋살 일정과 참가 여부 기능이 들어올 자리입니다.</p></article>
-        <article><h2>최근 공지</h2><p>팀 공지사항이 들어올 자리입니다.</p></article>
-        <article><h2>최근 결과</h2><p>경기 결과가 들어올 자리입니다.</p></article>
+    <!-- 로그인 전에는 서비스에서 제공하는 주요 기능만 간단히 소개합니다. -->
+    <section class="placeholder-grid" th:unless="${signedIn}" aria-label="주요 기능 소개">
+        <article><h2>풋살 일정</h2><p>다가오는 일정을 확인하고 참가 여부를 응답할 수 있습니다.</p></article>
+        <article><h2>팀 게시판</h2><p>공지사항을 확인하고 자유롭게 이야기를 나눌 수 있습니다.</p></article>
+        <article><h2>유니폼 신청</h2><p>신청 기간에 원하는 사이즈와 수량을 제출할 수 있습니다.</p></article>
+    </section>
+
+    <!-- 로그인 후에는 여러 기능의 최신 정보를 한 화면에 모아 보여줍니다. -->
+    <section class="dashboard" th:if="${signedIn}" aria-label="팀 대시보드">
+        <article class="dashboard-card dashboard-schedule">
+            <div class="dashboard-card-heading">
+                <div><p class="dashboard-label">NEXT SCHEDULE</p><h2>다음 풋살 일정</h2></div>
+                <a th:href="@{/schedules}">전체 보기</a>
+            </div>
+            <a class="dashboard-feature-link" th:if="${dashboard.nextSchedule != null}"
+               th:href="@{/schedules/{id}(id=${dashboard.nextSchedule.id})}">
+                <time th:datetime="${dashboard.nextSchedule.scheduledAt}"
+                      th:text="${#temporals.format(dashboard.nextSchedule.scheduledAt, 'M월 d일 (E) HH:mm')}">8월 24일 19:00</time>
+                <h3 th:text="${dashboard.nextSchedule.title}">정기 풋살</h3>
+                <p th:text="${dashboard.nextSchedule.location}">장소</p>
+                <span class="dashboard-status" th:if="${dashboard.nextSchedule.participationStatus != null}"
+                      th:text="|내 응답: ${dashboard.nextSchedule.participationStatus.label}|">내 응답: 참가</span>
+                <span class="dashboard-status pending" th:unless="${dashboard.nextSchedule.participationStatus != null}">참가 여부 미응답</span>
+            </a>
+            <div class="dashboard-empty" th:unless="${dashboard.nextSchedule != null}">
+                <p>예정된 풋살 일정이 없습니다.</p>
+            </div>
+        </article>
+
+        <article class="dashboard-card">
+            <div class="dashboard-card-heading">
+                <div><p class="dashboard-label">NOTICE</p><h2>최근 공지</h2></div>
+                <a th:href="@{/notices}">전체 보기</a>
+            </div>
+            <div class="dashboard-list" th:if="${!dashboard.recentNotices.isEmpty()}">
+                <a th:each="notice : ${dashboard.recentNotices}" th:href="@{/notices/{id}(id=${notice.id})}">
+                    <strong th:text="${notice.title}">공지 제목</strong>
+                    <time th:datetime="${notice.createdAt}" th:text="${#temporals.format(notice.createdAt, 'MM.dd')}">08.21</time>
+                </a>
+            </div>
+            <div class="dashboard-empty" th:if="${dashboard.recentNotices.isEmpty()}"><p>등록된 공지사항이 없습니다.</p></div>
+        </article>
+
+        <article class="dashboard-card dashboard-posts">
+            <div class="dashboard-card-heading">
+                <div><p class="dashboard-label">FREE BOARD</p><h2>최근 자유게시글</h2></div>
+                <a th:href="@{/freeboards}">전체 보기</a>
+            </div>
+            <div class="dashboard-list" th:if="${!dashboard.recentPosts.isEmpty()}">
+                <a th:each="post : ${dashboard.recentPosts}" th:href="@{/freeboards/{id}(id=${post.id})}">
+                    <span>
+                        <strong th:text="${post.title}">게시글 제목</strong>
+                        <small th:text="|댓글 ${post.commentCount}|">댓글 0</small>
+                    </span>
+                    <span class="dashboard-post-meta" th:text="${post.authorName}">작성자</span>
+                </a>
+            </div>
+            <div class="dashboard-empty" th:if="${dashboard.recentPosts.isEmpty()}"><p>등록된 자유게시글이 없습니다.</p></div>
+        </article>
+
+        <article class="dashboard-card dashboard-uniform">
+            <div class="dashboard-card-heading">
+                <div><p class="dashboard-label">UNIFORM</p><h2>유니폼 신청</h2></div>
+                <a th:href="@{/uniform-orders}">전체 보기</a>
+            </div>
+            <a class="dashboard-feature-link" th:if="${dashboard.openUniformOrder != null}"
+               th:href="@{/uniform-orders/{id}(id=${dashboard.openUniformOrder.id})}">
+                <span class="status-badge open">신청 중</span>
+                <h3 th:text="${dashboard.openUniformOrder.title}">유니폼 추가 신청</h3>
+                <p th:text="|${#temporals.format(dashboard.openUniformOrder.endsAt, 'M월 d일 HH:mm')}까지|">8월 31일까지</p>
+            </a>
+            <div class="dashboard-empty" th:unless="${dashboard.openUniformOrder != null}"><p>현재 신청 가능한 유니폼 주문이 없습니다.</p></div>
+        </article>
     </section>
 </main>
 
